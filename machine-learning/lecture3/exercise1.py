@@ -45,9 +45,7 @@ train_x_covariance = sh.getCovariance(train_x)
 train_y_mean = sh.getMean(train_y)
 train_y_covariance = sh.getCovariance(train_y)
 
-# Computing the priors
-# Given that the files containing the training data have 100% chance of containing data from their respective classes
-# Prior is 1
+# Computing the priors, finding the total amount of samples and dividing by the sample count of each dataset.
 total_samples = len(train_x) + len(train_y)
 print("Total training samples: {}".format(total_samples))
 
