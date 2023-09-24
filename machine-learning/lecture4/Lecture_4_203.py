@@ -5,7 +5,8 @@
 # Lecture: 4 Dimensionality reduction
 # Dependencies: numpy, matplotlib
 # Python version: 3.11.4
-# Functionality: 
+# Functionality: Excersise on dimention reduction with both PCA 
+# and LDA methods, and comparison of the generated groups.
 # ###################################
 
 import matplotlib.pyplot as plt

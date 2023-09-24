@@ -6,7 +6,7 @@
 - Guillermo V. Gutierrez-Bea
 
 ## Overall description
-
+Excersise on dimention reduction with both PCA and LDA methods, and comparison of the generated groups.
 
 
 ### About the scripts
