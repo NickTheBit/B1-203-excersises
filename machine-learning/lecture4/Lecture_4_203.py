@@ -3,7 +3,7 @@
 # Members : Malthe Boelskift, Louis Ildal, Guillermo Gutierrez Bea, Nikolaos Gkloumpos.
 # Date : 13/09/2023
 # Lecture: 4 Dimensionality reduction
-# Dependencies: numpy, matplotlib
+# Dependencies: numpy, matplotlib, sklearn, scipy
 # Python version: 3.11.4
 # Functionality: Excersise on dimention reduction with both PCA 
 # and LDA methods, and comparison of the generated groups.
@@ -127,8 +127,8 @@ train_8_mean_pca,train_8_cov_pca=compute_mean_covariance(train8_transformed_PCA)
 # %%
 #Estimate parameters for a bivariante Gaussian distribution.
 train_5_mean,train_5_cov=compute_mean_covariance(train5_transformed_LDA)
-train_6_mean,train_6_cov=compute_mean_covariance(train5_transformed_LDA)
-train_8_mean,train_8_cov=compute_mean_covariance(train5_transformed_PCA)
+train_6_mean,train_6_cov=compute_mean_covariance(train6_transformed_LDA)
+train_8_mean,train_8_cov=compute_mean_covariance(train8_transformed_LDA)
 
 # Transform test data using fitted PCA/LDA instance
 
