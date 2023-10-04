@@ -5,8 +5,9 @@
 # Lecture: Linear discriminants
 # Dependencies: numpy, matplotlib, sklearn, scipy
 # Python version: 3.11.4
-# Functionality: # Functionality: Classification, this one reduces the dataset to 2 dimentions.
+# Functionality: Classification, this one reduces the dataset to 9 dimentions.
 # ###################################
+
 
 import numpy as np
 from scipy.io import loadmat
@@ -25,7 +26,7 @@ train_data = np.concatenate([mnist[f"train{i}"] for i in range(10)], axis=0) / 2
 labels = np.concatenate([i * np.ones(len(mnist[f"train{i}"])) for i in range(10)])
 
 # Define the number of dimensions for dimensionality reduction (2 for PCA, 2 for LDA)
-num_dimensions = 2
+num_dimensions = 9
 
 # Perform dimensionality reduction using PCA
 pca = PCA(n_components=num_dimensions)
@@ -73,9 +74,9 @@ confusion_matrix_lda = confusion_matrix(test_labels, predictions_lda)
 
 
 pcaPlot = ConfusionMatrixDisplay(confusion_matrix_pca, display_labels=np.arange(10))
-pcaPlot.plot(cmap='Blues', values_format='d').ax_.set_title("PCA Reduction to 2 dimentions")
-plt.savefig("pcaReduction.png")
+pcaPlot.plot(cmap='Blues', values_format='d').ax_.set_title("PCA Reduction to 9 dimentions")
+plt.savefig("pcaReduction_to9.png")
 
 ldaPlot = ConfusionMatrixDisplay(confusion_matrix_lda, display_labels=np.arange(10))
-ldaPlot.plot(cmap='Blues', values_format='d').ax_.set_title("LDA Reduction to 2 dimentions")
-plt.savefig("ldaReduction.png")
+ldaPlot.plot(cmap='Blues', values_format='d').ax_.set_title("LDA Reduction to 9 dimentions")
+plt.savefig("ldaReduction_to9.png")

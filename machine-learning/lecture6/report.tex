@@ -13,7 +13,7 @@
 \usepackage{graphicx}
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
 
-\title{Session 5 project}
+\title{Session 6 project}
 
 \author {
       Gkloumpos Nikolaos,
@@ -25,58 +25,55 @@
 \begin{document}
 \maketitle
 
-\text {Group 203}
+\text {
+      Group: 203
+}
 
-\section{Excersise 1}
-Using the previously generated 2D data, for classes 5, 6, and 8 we need to remove the 
-labels and use a gausian mixture model to model them.
 
-A visualisation can be seen here:
+\section{Excersise}
+Perform classification for the entire MNIST dataset based on the algorithms introduced: 
+Use LDA for dimensionality reduction to 2 or 9 dimensions, classify the dimension-reduced data and compare this classification performance with that of using PCA.
+\\
+The data is concatenated and then dimensionality reduced to 2 dimensions using LCA and PDA
+Using the reduced training data we train a classifier using K-nearest neighbor.
+Using the obtained classifier we predict the classes for the LCA and PCA reduced test data.
+\\
+The prediction accuracy for PCA is 0.44.
+\\
+The prediction accuracy for LDA is 0.55.
+\\
+Confusion matrices
 \begin{figure}[h]
-      \caption{Gaussian mixture model with 3 components}
+      \caption{PCA reduction confusion matrix.}
       \centering
-      \includegraphics[width=0.5\textwidth]{gausianMixPlot.png}
+      \includegraphics[width=0.5\textwidth]{pcaReduction.png}
 \end{figure}   
 
-\section{Excersise 2}
-Compare the Gaussian mixture model with the Gaussian models trained in the
- previous assignment, in terms of mean and variance values as well as through visualisation.
-\newline
-This are the means from the Gaussian models and the Gaussian mixture models:
-\newline
-mean5: $[-1.09629628 -0.35037072]$
-\newline
-mean6: $[2.60384024 0.86074213]$
-\newline
-mean8: $[-1.61901038 -0.54586145]$
-\newline
-mean1gmm: $[3.10726354 0.52307774]$
-\newline
-mean2gmm: $[-1.43860167  1.61351073]$
-\newline
-mean3gmm: $[-1.00256296 -2.06294658]$
-\newline
+\begin{figure}[h]
+      \caption{LDA reduction confusion matrix.}
+      \centering
+      \includegraphics[width=0.5\textwidth]{ldaReduction.png}
+\end{figure}   
+
+We repeated the exercise but this time the dimensionality of the data was reduced to 9 components instead of 2.
+\\
+The prediction accuracy for PCA is 0.92.
+\\
+The prediction accuracy for LDA is 0.92.
+\\
+Confusion matrices in this case
+\begin{figure}[h]
+      \caption{PCA reduction confusion matrix.}
+      \centering
+      \includegraphics[width=0.5\textwidth]{pcaReduction_to9.png}
+\end{figure}   
 
 \begin{figure}[h]
-      \caption{Comparison of covariance matrices for Gaussian models and GMM}
+      \caption{LDA reduction confusion matrix.}
       \centering
-      \includegraphics[width=0.5\textwidth]{Covariances.png}
-\end{figure}     
-
-\begin{figure}[h]
-      \caption{Gaussian contours plot for GMM}
-      \centering
-      \includegraphics[width=0.5\textwidth]{GausianCountoursPlot.png}
-\end{figure} 
-
-\begin{figure}[h]
-      \caption{Gaussian contours plot for Gaussian models}
-      \centering
-      \includegraphics[width=0.5\textwidth]{GausianCountoursPrevExercise.png}
-\end{figure} 
-
-From the pictures one can see that one of the classes predicted by the gaussian mixture model is very close to the actual classes from the labeled data. It has problems predicting two of the classes because they are overlapping each other, specifically class 5 and 8. 
-
+      \includegraphics[width=0.5\textwidth]{ldaReduction_to9.png}
+\end{figure}   
+The accurary of calssification of the PCA reduced data increased by 48\%, whereas the accurary of calssification of the LDA reduced data increased by a 37\%.  
 \bibliographystyle{alpha}
 \bibliography{sample}
 
