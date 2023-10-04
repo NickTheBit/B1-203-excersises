@@ -1,0 +1,83 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[english]{babel}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\title{Session 5 project}
+
+\author {
+      Gkloumpos Nikolaos,
+      Malthe H. Boelskift,
+      Louis Ildal,
+      Guillermo V. Gutierrez-Bea,
+}
+
+\begin{document}
+\maketitle
+
+\text {Group 203}
+
+\section{Excersise 1}
+Using the previously generated 2D data, for classes 5, 6, and 8 we need to remove the 
+labels and use a gausian mixture model to model them.
+
+A visualisation can be seen here:
+\begin{figure}[h]
+      \caption{Gaussian mixture model with 3 components}
+      \centering
+      \includegraphics[width=0.5\textwidth]{gausianMixPlot.png}
+\end{figure}   
+
+\section{Excersise 2}
+Compare the Gaussian mixture model with the Gaussian models trained in the
+ previous assignment, in terms of mean and variance values as well as through visualisation.
+\newline
+This are the means from the Gaussian models and the Gaussian mixture models:
+\newline
+mean5: $[-1.09629628 -0.35037072]$
+\newline
+mean6: $[2.60384024 0.86074213]$
+\newline
+mean8: $[-1.61901038 -0.54586145]$
+\newline
+mean1gmm: $[3.10726354 0.52307774]$
+\newline
+mean2gmm: $[-1.43860167  1.61351073]$
+\newline
+mean3gmm: $[-1.00256296 -2.06294658]$
+\newline
+
+\begin{figure}[h]
+      \caption{Comparison of covariance matrices for Gaussian models and GMM}
+      \centering
+      \includegraphics[width=0.5\textwidth]{Covariances.png}
+\end{figure}     
+
+\begin{figure}[h]
+      \caption{Gaussian contours plot for GMM}
+      \centering
+      \includegraphics[width=0.5\textwidth]{GausianCountoursPlot.png}
+\end{figure} 
+
+\begin{figure}[h]
+      \caption{Gaussian contours plot for Gaussian models}
+      \centering
+      \includegraphics[width=0.5\textwidth]{GausianCountoursPrevExercise.png}
+\end{figure} 
+
+From the pictures one can see that one of the classes predicted by the gaussian mixture model is very close to the actual classes from the labeled data. It has problems predicting two of the classes because they are overlapping each other, specifically class 5 and 8. 
+
+\bibliographystyle{alpha}
+\bibliography{sample}
+
+\end{document}
