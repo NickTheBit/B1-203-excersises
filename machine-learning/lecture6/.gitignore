@@ -1,2 +1,7 @@
 env/
-
+mnist_all_ASCII/
+Lecture_6_203.zip
+*.aux
+*.log
+*.out
+.vscode/
