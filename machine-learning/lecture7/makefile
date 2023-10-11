@@ -2,9 +2,11 @@
 # Bellow the requirements for each element are broken down and implemented
 
 # Image recipies go here
+assets/figure1.png assets/figure2.png assets/figure3.png:
+	python3 Lecture_7_203.py
 
 # Report dependencies
-report.pdf: report.tex 
+report.pdf: report.tex
 	pdflatex report.tex
 	rm report.aux
 	rm report.log
