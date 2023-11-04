@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 QTable = np.ones((24, 8, 2))
 LevelHistory=[]
 ActionHistory=[]
-N_days=300 # Number of days that we are running the simulation
+N_days=1000 # Number of days that we are running the simulation
 
 def startup():
 	# Initializing environment
