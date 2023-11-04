@@ -2,10 +2,11 @@
 # For preliminary agent testing
 
 class Enviro:
-	tankMaxLevel = 200.0
+	tankMaxLevel = 8.0
 	tankMinLevel = 0.0
 	costOfOperationPerHour = 1
-	tankDircreteLevels = 4
+	tankDircreteLevels = 8
+	pumpFlowRate=1
 
 	# Safe zone
 	tankLowerLimit = tankMaxLevel / tankDircreteLevels
@@ -13,7 +14,7 @@ class Enviro:
 		(tankDircreteLevels - 1)
 	
 	# Enviroment status
-	currentTankLevel = 0
+	currentTankLevel = 100
 	pumpStatus = 0
 	
 	def __init__(self,tankLevel, pumpStatus):
@@ -36,24 +37,27 @@ class Enviro:
 		sum = 0.5*(endTime-startTime) * \
 			(self.inst_consumption(startTime)+self.inst_consumption(endTime))
 
-		return sum
+		return sum/12
 
-	def updateWaterLevel(self, startTime, endTime, tankLevel, flow):
-		A = 10
-		self.tankLevel = tankLevel + \
-			(flow-self.consumptionFunc(startTime, endTime))/A
+	def updateWaterLevel(self, startTime, endTime, flow):
+		A = 20
+		# Flow introduced after endTime-startTime 
+		flow=(endTime-startTime)*flow #Rectangular rule
+		self.currentTankLevel = self.currentTankLevel +(flow-self.consumptionFunc(startTime, endTime))/A
 	
-	def cost(self, currentTankLevel, flow):
+	def cost(self, flow):
 		# Discrete cost
+		lowerLimit=2
+		upperLimit=4
 		barrierCost = 0
-		if currentTankLevel >= self.tankDircreteLevels:
-			barrierCost = 1
-		elif currentTankLevel <= 0:
-			barrierCost = 1
+		if self.currentTankLevel >= upperLimit:
+			barrierCost =(self.currentTankLevel-upperLimit)**2
+		elif self.currentTankLevel <= lowerLimit:
+			barrierCost = (lowerLimit-self.currentTankLevel)**2
 		else:
 			barrierCost = 0
 
-		return self.costOfOperationPerHour * flow + barrierCost
+		return barrierCost
 	
 	def getTankLevelDiscrete(self):
 		# Compute and map out tank level to discrete states.
