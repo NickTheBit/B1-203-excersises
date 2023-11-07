@@ -1,15 +1,13 @@
 import cv2
 import numpy as np
+import perspectiveRef as perspective_reference
 
 # Load the image
-img = cv2.imread("rawImages/Guill_misaligned.jpg")
+img = cv2.imread("rawImages/Nick_aligned.jpg")
 
 # Scaling Down the image 1 times specifying a single scale factor.
 scale_down = 0.3
 img = cv2.resize(img, None, fx=scale_down, fy=scale_down, interpolation=cv2.INTER_LINEAR)
-
-# Just for drawing a rectangle if needed.
-# cv2.rectangle(img, (378, 575), (600, 733), (35, 35, 99), 2)
 
 # Displaying chess-board features
 ret, corners = cv2.findChessboardCorners(img, (4, 6),
@@ -19,23 +17,15 @@ ret, corners = cv2.findChessboardCorners(img, (4, 6),
 if not ret:
     print("We ain't found shit!")
 
-print(corners)
-# Drawing and printing the overlay of the checkerboard.
-# print("Corners of checkerboard")
-# print(corners)
-# print(corners.shape)
-# fnl = cv2.drawChessboardCorners(img, (4, 6), corners, ret)
-# cv2.imshow("fnl", fnl)
-# cv2.waitKey(0)
+# Get the checkerboard from a properly alligned image
+pref = perspective_reference.reference().get_ref_corners()
 
-# # Trying to correct
-ref_point_raw = np.float32([corners[0][0], corners[3][0], corners[23][0]])
-ideal_points = np.float32(
-    [[corners[0][0][0], corners[0][0][1]], [corners[3][0][0], corners[0][0][0]], [corners[23][0][0], corners[0][0][1]]])
+ref_point_raw = np.array([corners[0], corners[15], corners[20]])
+ideal_points = np.array([pref[0], pref[15], pref[20]])
 
 # Transformations
 opa = cv2.getAffineTransform(ref_point_raw, ideal_points)
 cols, rows, _ = img.shape
 transformed_img = cv2.warpAffine(img, opa, (cols, rows))
-cv2.imshow("gay", transformed_img)
+cv2.imshow("Fixed perspective", transformed_img)
 cv2.waitKey(0)
