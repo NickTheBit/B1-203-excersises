@@ -3,7 +3,10 @@ import numpy as np
 import perspectiveRef as perspective_reference
 import glob
 
-def allign(img):
+# Get the checkerboard from a properly aligned image
+pref = perspective_reference.reference().get_ref_corners()
+
+def allign(img, ref_corners):
 	# Scaling Down the image 1 times specifying a single scale factor.
 	scale_down = 0.3
 	img = cv2.resize(img, None, fx=scale_down, fy=scale_down, interpolation=cv2.INTER_LINEAR)
@@ -16,11 +19,8 @@ def allign(img):
 	if not ret:
 		print("We ain't found shit!")
 
-	# Get the checkerboard from a properly aligned image
-	pref = perspective_reference.reference().get_ref_corners()
-
 	ref_point_raw = np.array([corners[0], corners[15], corners[20]])
-	ideal_points = np.array([pref[0], pref[15], pref[20]])
+	ideal_points = np.array([ref_corners[0], ref_corners[15], ref_corners[20]])
 
 	# Transformations
 	opa = cv2.getAffineTransform(ref_point_raw, ideal_points)
@@ -35,6 +35,6 @@ for name in glob.glob("rawImages/*"):
 	print(name)
 	img = cv2.imread(name)
 	try:
-		allign(img)
-	except :
+		allign(img, pref)
+	except:
 		print("fail")
