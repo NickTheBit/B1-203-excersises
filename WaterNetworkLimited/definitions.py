@@ -1,5 +1,6 @@
 # This file includes all the necessary file definitions to establish a test environment.
 # For preliminary agent testing
+import numpy as np
 
 class Enviro:
 	tankMaxLevel = 8.0
@@ -16,6 +17,12 @@ class Enviro:
 	# Enviroment status
 	currentTankLevel = 100
 	pumpStatus = 0
+
+	# Noise model
+	stnd=10
+
+
+	
 	
 	def __init__(self,tankLevel, pumpStatus):
 		self.currentTankLevel = tankLevel
@@ -30,6 +37,14 @@ class Enviro:
 			inst_consumption = 13/6*Time-19
 		elif Time < 24:
 			inst_consumption = -3*Time+70
+		
+		noise_samples=np.random.normal(0,self.stnd)
+		inst_consumption=inst_consumption+noise_samples
+		if inst_consumption <0:
+			inst_consumption =0
+
+
+
 
 		return inst_consumption
 

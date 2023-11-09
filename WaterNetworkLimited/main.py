@@ -13,6 +13,7 @@ LevelHistory=[]
 ActionHistory=[]
 N_days=1000 # Number of days that we are running the simulation
 
+
 def startup():
 	# Initializing environment
 	env = d.Enviro(1, 10)
