@@ -25,8 +25,7 @@ plt.show()
 
 var = 100
 
-noise = np.asarray(np.round(np.random.normal(
-    loc=0, scale=np.sqrt(var), size=image.shape)), dtype=np.int16)
+noise = np.asarray(np.round(np.random.normal(loc=0, scale=np.sqrt(var), size=image.shape)), dtype=np.int16)
 
 image_noisy = (image + noise)
 
@@ -44,38 +43,37 @@ plt.gca().set_yticks([])
 plt.tight_layout()
 plt.show()
 
-
-# You can delete the (nopython=True) but it will cause numba.jit errors
 @numba.jit(nopython=True)
 def func(_im_noise, _var, _iterations, _w_diff, _max_diff):
-    image_buffer = np.zeros(
-        (2, _im_noise.shape[0], _im_noise.shape[1]), dtype=np.int16)
-    image_buffer[0] = np.copy(_im_noise)
-    image_buffer[1] = np.copy(_im_noise)
+    image_buffer = np.zeros((2, _im_noise.shape[0], _im_noise.shape[1]), dtype=_im_noise.dtype)
+    image_buffer[0] = _im_noise
+    image_buffer[1] = _im_noise
 
-    V_max = _im_noise.shape[0] * _im_noise.shape[1] * \
-        (256 ** 2) / (2 * _var) + 4 * _w_diff * _max_diff
-
+    V_max = _im_noise.shape[0] * _im_noise.shape[1] * (256**2) / (2 * _var) + 4 * _w_diff * _max_diff
+    
     for n in range(_iterations):
         s = n % 2
         d = (n + 1) % 2
 
-        for i in range(1, _im_noise.shape[0] - 1):
-            for j in range(1, _im_noise.shape[1] - 1):
+        for i in range(_im_noise.shape[0]):
+            for j in range(_im_noise.shape[1]):
                 V_local = V_max
                 min_val = -1
 
                 for k in range(256):
-                    V_data = (k - _im_noise[i, j]) ** 2 / (2 * _var)
+                    V_data = (k - _im_noise[i, j])**2 / (2 * _var)
+                    V_diff = 0
 
-                    V_diff = (
-                        (k - image_buffer[s, i - 1, j]) ** 2
-                        + (k - image_buffer[s, i + 1, j]) ** 2
-                        + (k - image_buffer[s, i, j - 1]) ** 2
-                        + (k - image_buffer[s, i, j + 1]) ** 2
-                    )
-
-                    V_current = V_data + _w_diff * min(V_diff, _max_diff)
+                    if i > 0:
+                        V_diff += min(((k - image_buffer[s, i - 1, j])**2, _max_diff))
+                    if i < _im_noise.shape[0] - 1:
+                        V_diff += min(((k - image_buffer[s, i + 1, j])**2, _max_diff))
+                    if j > 0:
+                        V_diff += min(((k - image_buffer[s, i, j - 1])**2, _max_diff))
+                    if j < _im_noise.shape[1] - 1:
+                        V_diff += min(((k - image_buffer[s, i, j + 1])**2, _max_diff))
+                    
+                    V_current = V_data + _w_diff * V_diff
 
                     if V_current < V_local:
                         min_val = k
@@ -83,8 +81,7 @@ def func(_im_noise, _var, _iterations, _w_diff, _max_diff):
 
                 image_buffer[d, i, j] = min_val
 
-    return image_buffer[_iterations % 2]
-
+    return image_buffer[d]
 
 # Hyperparameters
 iterations = 100
