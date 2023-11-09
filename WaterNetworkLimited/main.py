@@ -20,13 +20,15 @@ def startup():
 	# Learning parameters
 	learning_rate = 0.9
 	discount_factor = 1
+	x_intersect=100 # day at which epsilon decays to 0
+	a=9/x_intersect
 
 	for j in range(0,N_days):
 		# Looping over every state, lol
 		for i in range(0, 23):
 			# Mapping out the tank
 			tankState = env.getTankLevelDiscrete()
-			epsilon=1-0.4*np.log10(j+1)
+			epsilon=1-np.log10(a*j+1) # logaritmic decay
 			optimalAction=np.argmin(QTable[i][tankState])
 			# This is the espilon-greedy algo.
 			if (rd.random() > epsilon):
@@ -41,7 +43,16 @@ def startup():
 			
 			env.updateWaterLevel(i, i+1, currentAction*env.pumpFlowRate)
 			futureTankState= env.getTankLevelDiscrete()  
-			Jnext=env.cost(currentAction)
+
+			#We penalize more if we get out of
+			if currentAction==1 and futureTankState==8:
+				Jnext=env.cost(currentAction)*5
+			elif currentAction==0 and futureTankState==0:
+				Jnext=env.cost(currentAction)*5
+			else:
+				Jnext=env.cost(currentAction)*5
+				
+			
 
 			# Updating the Q - Value
 			QTable[i][tankState][currentAction] = QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[i+1][futureTankState][np.argmin(QTable[i+1][futureTankState])]-QTable[i][tankState][currentAction])
@@ -56,7 +67,9 @@ def startup():
 	plt.title("Water Level over time")
 	plt.xlabel("time[h]")
 	plt.ylabel("[L]")
+	plt.subplot(2,1,1)
 	plt.plot(LevelHistory)	
+	plt.subplot(2,1,2)
 	plt.plot(ActionHistory)		
 	
 	plt.figure(2)
