@@ -3,7 +3,10 @@ lNum = 11
 tempFolder = Lecture_$(lNum)_203
 targetZip = $(tempFolder).zip
 
-report.pdf: report.tex
+FinalComparison.png :
+	python3 Lecture_11_203.py
+
+report.pdf: report.tex FinalComparison.png
 	pdflatex report.tex
 	rm report.aux
 	rm report.log

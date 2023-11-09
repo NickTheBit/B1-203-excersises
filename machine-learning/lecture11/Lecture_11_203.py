@@ -21,7 +21,7 @@ plt.imshow(image, cmap='gray')
 plt.gca().set_xticks([])
 plt.gca().set_yticks([])
 plt.tight_layout()
-plt.show()
+plt.savefig("assets/Original.png")
 
 var = 100
 
@@ -41,7 +41,7 @@ plt.imshow(image_noisy, cmap='gray')
 plt.gca().set_xticks([])
 plt.gca().set_yticks([])
 plt.tight_layout()
-plt.show()
+plt.savefig("assets/Noisy.png")
 
 @numba.jit(nopython=True)
 def func(_im_noise, _var, _iterations, _w_diff, _max_diff):
@@ -113,4 +113,4 @@ plt.gca().set_xticks([])
 plt.gca().set_yticks([])
 plt.tight_layout()
 
-plt.show()
+plt.savefig("assets/FinalComparison.png")
