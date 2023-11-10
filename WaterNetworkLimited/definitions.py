@@ -7,27 +7,82 @@ class Enviro:
 	tankMinLevel = 0.0
 	costOfOperationPerHour = 1
 	tankDircreteLevels = 8
-	pumpFlowRate=10
+	pumpFlowRate=5
+	noiseStatus=0
+
+	consumption_record=[]
 
 	# Safe zone
 	tankLowerLimit = tankMaxLevel / tankDircreteLevels
 	tankUpperLimit = (tankMaxLevel / tankDircreteLevels) * \
 		(tankDircreteLevels - 1)
 	
+	demandAtenuation=10
+	
 	# Enviroment status
 	currentTankLevel = 100
 	pumpStatus = 0
 
-	# Noise model
-	stnd=10
+	# Import expected demand and expected std
+	mean_h= np.array([[ 7.30575868],
+       [ 7.60336177],
+       [ 9.39440481],
+       [ 8.28560809],
+       [ 7.48416466],
+       [17.79298767],
+       [15.24356728],
+       [12.89008299],
+       [11.65732454],
+       [10.97107084],
+       [ 5.59203111],
+       [ 8.85522173],
+       [ 5.09258188],
+       [ 9.4017683 ],
+       [ 8.81812826],
+       [20.74735851],
+       [11.44272346],
+       [19.62373481],
+       [13.33540488],
+       [17.47234512],
+       [ 8.00550895],
+       [12.81140972],
+       [ 7.46738026],
+       [ 9.12657279]])
+	
+	Stdd_h=np.array([[21.33726572],
+       [18.3268918 ],
+       [16.93748845],
+       [18.88926934],
+       [17.03673154],
+       [32.61273064],
+       [51.23640651],
+       [63.56530467],
+       [65.2972982 ],
+       [60.03052152],
+       [53.76088541],
+       [53.55298658],
+       [52.24595511],
+       [51.16605613],
+       [54.02167404],
+       [55.18792935],
+       [53.62179446],
+       [49.39319854],
+       [56.00209146],
+       [48.59388232],
+       [39.80549087],
+       [37.34640026],
+       [30.83563069],
+       [25.74452874]])
 
 
 	
 	
-	def __init__(self,tankLevel, pumpStatus):
+	def __init__(self,tankLevel, pumpStatus,noiseStatus):
 		self.currentTankLevel = tankLevel
 		self.pumpStatus = pumpStatus
+		self.noiseStatus= noiseStatus
 
+	"""
 	def inst_consumption(self, Time):
 		if Time < 6:
 			inst_consumption = 5/3*Time+2
@@ -42,17 +97,24 @@ class Enviro:
 		inst_consumption=inst_consumption+noise_samples
 		if inst_consumption <0:
 			inst_consumption =0
-
-
-
-
+	
+		return inst_consumption
+	"""
+	def inst_consumption(self, Time):
+		inst_consumption=self.mean_h[Time,0]+self.noiseStatus*np.random.normal(0,self.Stdd_h[Time,0])
+		# To avoid negative values
+		if inst_consumption <0:
+			inst_consumption=0
+		
+		self.consumption_record.append(inst_consumption/self.demandAtenuation)
+		
 		return inst_consumption
 
 	def consumptionFunc(self, startTime, endTime):
 		sum = 0.5*(endTime-startTime) * \
 			(self.inst_consumption(startTime)+self.inst_consumption(endTime))
 
-		return sum/5
+		return sum/self.demandAtenuation
 
 	def updateWaterLevel(self, startTime, endTime, flow):
 		A = 20
@@ -91,14 +153,3 @@ class Enviro:
 	
 
 # ----------------- Section of shame ------------------------
-
-	# def cost(self, currentTankLevel,flow):
-
-	# 	# Cost associated to the tank level
-	# 	if currentTankLevel < self.tankLowerLimit:
-	# 		barrierCost = (currentTankLevel-self.tankLowerLimit)**2
-	# 	elif currentTankLevel > self.tankUpperLimit:
-	# 		barrierCost = (currentTankLevel-self.tankUpperLimit)**2
-	# 	else:
-	# 		barrierCost = 0
-	# 	return self.costOfOperationPerHour * flow + barrierCost

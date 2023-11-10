@@ -7,6 +7,7 @@ import definitions as d
 import random as rd
 import matplotlib.pyplot as plt
 
+
 # Q(time,tankLevel,pump enabled)
 QTable = np.ones((24, 8, 2))
 LevelHistory=[]
@@ -16,10 +17,10 @@ N_days=1000 # Number of days that we are running the simulation
 
 def startup():
 	# Initializing environment
-	env = d.Enviro(1, 10)
+	env = d.Enviro(1, 10,0) # arguments: initial tank level, pump status, noise status (either 0 or 1)
 
 	# Learning parameters
-	learning_rate = 0.9
+	learning_rate = 0.5
 	discount_factor = 1
 	x_intersect=100 # day at which epsilon decays to 0
 	a=9/x_intersect
@@ -63,23 +64,48 @@ def startup():
 	
 			
 		
-	plt.style.use('dark_background') 
+
+	plt.style.use('dark_background')
+
 	plt.figure(1)
-	plt.title("Water Level over time")
-	plt.xlabel("time[h]")
-	plt.ylabel("[L]")
-	plt.subplot(2,1,1)
-	plt.plot(LevelHistory)	
-	plt.subplot(2,1,2)
-	plt.plot(ActionHistory)		
-	
+	plt.suptitle("Water Level and Action over time")  # Title for the entire figure
+
+	# First subplot
+	plt.subplot(2, 1, 1)
+	plt.plot(LevelHistory)
+	plt.ylabel("Water Level [L]")  # Y-axis label for the first subplot
+	plt.title("Water Level over time [L]")  # Title for the first subplot
+
+	# Second subplot
+	plt.subplot(2, 1, 2)
+	plt.plot(ActionHistory)
+	plt.ylabel("Action")  # Y-axis label for the second subplot
+	plt.xlabel("time [h]")  # X-axis label for the second subplot
+
+	# Adjust layout
+	plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Adjust the rect to provide space for the suptitle
+
+
 	plt.figure(2)
-	plt.title("Water Level over the last day")
-	plt.xlabel("time[h]")
-	plt.ylabel("[L]")
-	plt.plot(LevelHistory[len(LevelHistory)-24:len(LevelHistory)])
-	plt.plot(ActionHistory[len(ActionHistory)-24:len(ActionHistory)])
-	
+
+	# First subplot
+	plt.subplot(2, 1, 1)
+	plt.plot(LevelHistory[len(LevelHistory) - 24 : len(LevelHistory)], label="Levels last day")
+	plt.plot(ActionHistory[len(ActionHistory) - 24 : len(ActionHistory)], label="Actions last day")
+	plt.ylabel("Levels/Actions")  # Y-axis label
+	plt.title("Water Level and Actions over the last day [L]")  # Title for the first subplot
+	plt.legend()  # Adding a legend to distinguish between LevelHistory and ActionHistory
+
+	# Second subplot
+	plt.subplot(2, 1, 2)
+	plt.plot(env.consumption_record[len(LevelHistory) - 24 : len(LevelHistory)])
+	plt.xlabel("Time [h]")  # X-axis label
+	plt.ylabel("Demand")  # Y-axis label
+	plt.title("Demand vs Water Level over the last day [L]")  # Title for the second subplot
+
+	# Adjust layout to prevent overlap
+	plt.tight_layout()
+
 	plt.show()
 
 	
