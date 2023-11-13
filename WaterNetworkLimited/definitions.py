@@ -1,5 +1,6 @@
 # This file includes all the necessary file definitions to establish a test environment.
 # For preliminary agent testing
+
 import numpy as np
 
 class Enviro:
@@ -7,7 +8,7 @@ class Enviro:
 	tankMinLevel = 0.0
 	costOfOperationPerHour = 1
 	tankDircreteLevels = 8
-	pumpFlowRate=5
+	pumpFlowRate=10
 	noiseStatus=0
 
 	consumption_record=[]
@@ -24,32 +25,7 @@ class Enviro:
 	pumpStatus = 0
 
 	# Import expected demand and expected std
-	mean_h= np.array([[ 7.30575868],
-       [ 7.60336177],
-       [ 9.39440481],
-       [ 8.28560809],
-       [ 7.48416466],
-       [17.79298767],
-       [15.24356728],
-       [12.89008299],
-       [11.65732454],
-       [10.97107084],
-       [ 5.59203111],
-       [ 8.85522173],
-       [ 5.09258188],
-       [ 9.4017683 ],
-       [ 8.81812826],
-       [20.74735851],
-       [11.44272346],
-       [19.62373481],
-       [13.33540488],
-       [17.47234512],
-       [ 8.00550895],
-       [12.81140972],
-       [ 7.46738026],
-       [ 9.12657279]])
-	
-	Stdd_h=np.array([[21.33726572],
+	mean_h= np.array([[21.33726572],
        [18.3268918 ],
        [16.93748845],
        [18.88926934],
@@ -73,6 +49,32 @@ class Enviro:
        [37.34640026],
        [30.83563069],
        [25.74452874]])
+	
+	
+	Stdd_h=np.array([[ 7.30575868],
+       [ 7.60336177],
+       [ 9.39440481],
+       [ 8.28560809],
+       [ 7.48416466],
+       [17.79298767],
+       [15.24356728],
+       [12.89008299],
+       [11.65732454],
+       [10.97107084],
+       [ 5.59203111],
+       [ 8.85522173],
+       [ 5.09258188],
+       [ 9.4017683 ],
+       [ 8.81812826],
+       [20.74735851],
+       [11.44272346],
+       [19.62373481],
+       [13.33540488],
+       [17.47234512],
+       [ 8.00550895],
+       [12.81140972],
+       [ 7.46738026],
+       [ 9.12657279]])
 
 
 	
@@ -101,7 +103,7 @@ class Enviro:
 		return inst_consumption
 	"""
 	def inst_consumption(self, Time):
-		inst_consumption=self.mean_h[Time,0]+self.noiseStatus*np.random.normal(0,self.Stdd_h[Time,0])
+		inst_consumption=np.random.normal(self.mean_h[Time,0],self.noiseStatus*self.Stdd_h[Time,0])
 		# To avoid negative values
 		if inst_consumption <0:
 			inst_consumption=0
@@ -110,18 +112,20 @@ class Enviro:
 		
 		return inst_consumption
 
-	def consumptionFunc(self, startTime, endTime):
-		sum = 0.5*(endTime-startTime) * \
-			(self.inst_consumption(startTime)+self.inst_consumption(endTime))
+
+	def consumptionFunc(self, Time):
+		deltaT=1
+		sum = deltaT*self.inst_consumption(Time)
 
 		return sum/self.demandAtenuation
 
-	def updateWaterLevel(self, startTime, endTime, flow):
+	def updateWaterLevel(self, Time, flow):
 		A = 20
+		deltaT=1
 
 		# Flow introduced after endTime-startTime 
-		flow=(endTime-startTime)*flow #Rectangular rule
-		update = self.currentTankLevel +(flow-self.consumptionFunc(startTime, endTime))/A
+		flow_=(deltaT)*flow #Rectangular rule
+		update = self.currentTankLevel +(flow_-self.consumptionFunc(Time))/A
 		if update <=0:
 			self.currentTankLevel = 0
 		elif update >= self.tankMaxLevel:
@@ -144,8 +148,32 @@ class Enviro:
 		else:
 			barrierCost = 0
 
-		return flow*self.costOfOperationPerHour+barrierCost
-	
+		return flow*self.costOfOperationPerHour+self.pumpFlowRate*barrierCost
+		
+	def getTankLevelDiscreteVariable(self):
+		step=0.01
+		N_bins=9
+		N_=N_bins+step
+		steepnes=4
+		N_fine=4
+
+		#Boundaries
+		lowerBoundary=2
+		higherBoundary=4
+		x=self.currentTankLevel
+
+		if x <=lowerBoundary-1:
+			y=x
+		elif x <=lowerBoundary+1:
+			z = 1/(1 + np.exp(-steepnes*(x-lowerBoundary))) 
+			y=N_fine*z+lowerBoundary-1
+		elif x <=higherBoundary+1:
+			z = 1/(1 + np.exp(-steepnes*(x-higherBoundary))) 
+			y=N_fine*z+N_fine
+		else:
+			y=x+N_fine
+		return int(y)
+
 	def getTankLevelDiscrete(self):
 		# Compute and map out tank level to discrete states.
 		singleLevelQuantiny = self.tankMaxLevel / self.tankDircreteLevels
