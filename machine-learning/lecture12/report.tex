@@ -1,0 +1,70 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[english]{babel}
+\usepackage{float}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\title{Session 11 project}
+\author {
+      Gkloumpos Nikolaos,
+      Malthe H. Boelskift,
+      Louis Ildal,
+      Guillermo V. Gutierrez-Bea,
+}
+
+\begin{document}
+\maketitle
+
+\text {
+      Group: 203
+}
+
+\section{Decision tree} 
+Split the houses in two sets, one training set and one test set. Then the price labels were either set to 0 or 1 depending on if its price value was below or above the mean respectively. The training set and the binarized target set was used to fit the classification tree. Finally the training set was classified and the accuracy of the classification was calculated.
+
+\subsection{Classification Results}
+\begin{verbatim}
+Tree Depth: None, Training Accuracy: 1.0000, Test Accuracy: 0.8365
+Tree Depth: 3, Training Accuracy: 0.7938, Test Accuracy: 0.7897
+Tree Depth: 5, Training Accuracy: 0.8302, Test Accuracy: 0.8227
+Tree Depth: 10, Training Accuracy: 0.9095, Test Accuracy: 0.8442
+\end{verbatim}
+
+\subsection{Regression Results}
+\begin{verbatim}
+Tree Depth: None, Training MSE: 0.0000, Test MSE: 0.4952
+Tree Depth: 3, Training MSE: 0.6177, Test MSE: 0.6424
+Tree Depth: 5, Training MSE: 0.4843, Test MSE: 0.5245
+Tree Depth: 10, Training MSE: 0.2209, Test MSE: 0.4155
+\end{verbatim}
+
+\section {Environment reproduction}
+To reproduce the environment used to build the excersise, follow these instructions:
+
+\begin{verbatim}
+python3 -m venv env
+source env/bin/acivate
+pip3 install numpy scikit matplotlib
+\end{verbatim}
+
+After the above steps the program can be executed by typing
+
+\begin{verbatim}
+python3 `ProgramName.py'
+\end{verbatim}
+
+\bibliographystyle{alpha}
+\bibliography{sample}
+
+\end{document}
