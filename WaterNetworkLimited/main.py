@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 
 # Q(time,tankLevel,pump enabled)
-QTable = np.ones((24, 13, 2))
+QTable = np.ones((24, 19, 2))
 LevelHistory=[]
 ActionHistory=[]
 N_days=1000 # Number of days that we are running the simulation
@@ -17,11 +17,11 @@ N_days=1000 # Number of days that we are running the simulation
 
 def startup():
 	# Initializing environment
-	env = d.Enviro(1, 20,0) # arguments: initial tank level, pump status, noise status (either 0 or 1)
+	env = d.Enviro(1, 20,1) # arguments: initial tank level, pump status, noise status (either 0 or 1)
 
 	# Learning parameters
 	learning_rate = 0.5
-	discount_factor = 1
+	discount_factor = 0.8
 	x_intersect=100 # day at which epsilon decays to 0
 	a=9/x_intersect
 
@@ -43,7 +43,7 @@ def startup():
 		
 			# Take action a and observe s',r'
 			env.updateWaterLevel(i, currentAction*env.pumpFlowRate)
-			futureTankState= env.getTankLevelDiscrete()  
+			futureTankState= env.getTankLevelDiscreteVariable()  
 
 			#We penalize more if we get out of
 			if currentAction==1 and futureTankState==8:
