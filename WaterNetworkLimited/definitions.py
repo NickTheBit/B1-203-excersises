@@ -148,30 +148,37 @@ class Enviro:
 		else:
 			barrierCost = 0
 
-		return flow*self.costOfOperationPerHour+self.pumpFlowRate*barrierCost
+		return flow*self.costOfOperationPerHour+self.pumpFlowRate*2*barrierCost
 		
 	def getTankLevelDiscreteVariable(self):
-		step=0.01
-		N_bins=9
-		N_=N_bins+step
-		steepnes=4
-		N_fine=4
+		
+		steepnes=4 # Steepnes of the non-linear region (steepness of the sigmoid function)
+		N_fine=7 # Number of discrete states in the region of fine discretization
+		spread=1
 
 		#Boundaries
 		lowerBoundary=2
 		higherBoundary=4
+
+		# This is a pice wise continuous function from x=[0,Max_h], and consists of two linear regions 
+		# and two sigmoid functions near the boundaries
 		x=self.currentTankLevel
 
-		if x <=lowerBoundary-1:
+		# This is a pice wise continuous function from x=[0,Max_h], and consists of two linear regions 
+		# and two sigmoid functions near the boundaries
+		Z=2*N_fine+spread
+
+		if x <=lowerBoundary-spread:
 			y=x
-		elif x <=lowerBoundary+1:
+		elif x <=lowerBoundary+spread:
 			z = 1/(1 + np.exp(-steepnes*(x-lowerBoundary))) 
-			y=N_fine*z+lowerBoundary-1
-		elif x <=higherBoundary+1:
+			y=N_fine*z+lowerBoundary-spread
+        
+		elif x <=higherBoundary+spread:
 			z = 1/(1 + np.exp(-steepnes*(x-higherBoundary))) 
-			y=N_fine*z+N_fine
+			y=N_fine*z+N_fine+spread
 		else:
-			y=x+N_fine
+			y=x-(higherBoundary+spread)+Z
 		return int(y)
 
 	def getTankLevelDiscrete(self):
@@ -179,5 +186,3 @@ class Enviro:
 		singleLevelQuantiny = self.tankMaxLevel / self.tankDircreteLevels
 		return int(self.currentTankLevel / singleLevelQuantiny)-1
 	
-
-# ----------------- Section of shame ------------------------
