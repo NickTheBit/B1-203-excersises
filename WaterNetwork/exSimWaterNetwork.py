@@ -11,7 +11,6 @@ import random as rd
 class pumpingStationControl:
 	# Setup Q-Learning parameters.
 	descreteStates = 5
-	ql = sf.supportFunctions(3.2, descreteStates)
 
 	def __init__(self, cheating_Total_Iterrations):
 		# Parameters
@@ -22,53 +21,47 @@ class pumpingStationControl:
 		self.num_running_pumps = 0.0   # Number of running pumps
 		self.speed = 1.0   # [0-1] Speed of active pumps, I'll politely ignore that for now.
 
-		# Initializing Q-learning
-		self.ql = sf.supportFunctions(3.2, self.descreteStates)
-
-		# step awareness, this may be cheating.
-		self.step = 0
 		# Normally we are not aware of the total steps of our array, this is CHEATING
 		self.totalIterrations = cheating_Total_Iterrations + 1
-		self.Qtable = np.ones((self.totalIterrations, self.descreteStates, self.num_of_pumps + 1))
+
+		# For this itteration the controller makes a decision once per hour.
+		self.Qtable = np.ones((24, self.descreteStates, self.num_of_pumps + 1))
 		# epsilon parameter
 		self.epsilon = 0.7  # this approach sucks
 		self.learning_rate = 0.3  # this should also do something.
 		self.discount_factor = 1 # This is probably too high
 
-	def simStep(self, level):
-		# Allocating space is possible, but not fast, so for now we are cheating by being aware of simulation steps
+		# Starting action
+		self.currentAction = 1
 
+		# Initializing Q-learning
+		self.ql = sf.supportFunctions(3.2, self.descreteStates, self.learning_rate, self.discount_factor)
+
+	def simStep(self, level, time):
+		# We are updating the Q-values, unless the step = 0
+
+		# Take action a and observe s',r'
 		tankState = self.ql.getTankLevelDiscrete(level)
-		# todo: why was this argmin? I'm too drunk to think, i just code.
-		optimalAction = np.argmax(self.Qtable[self.step][tankState])
+
+		# We penalize more if we get out of bounds
+		reward = self.ql.reward(tankState)
+
+
+		current_Q_value = self.Qtable[time][tankState][self.currentAction]
+		# Updating the Q - Value
+		self.Qtable[time][tankState][self.currentAction] = self.ql.compute_q(current_Q_value, reward, np.argmax(self.Qtable[time+1][tankState]))
+		
+		# Sellecting next step
+		optimalAction = np.argmax(self.Qtable[time][tankState])
 		# This is the espilon-greedy algo.
 		if (rd.random() > self.epsilon):
 			# Optimal sellection based on Q
-			currentAction = optimalAction
+			self.currentAction = optimalAction
 		else:
-			currentAction = rd.randint(0, self.num_of_pumps) # The -1 is because apparently it includes the number in the random sellection.
+			self.currentAction = rd.randint(0, self.num_of_pumps) # The -1 is because apparently it includes the number in the random sellection.
 
 		# Updating controller data
-		self.num_running_pumps = currentAction
-
-		# Take action a and observe s',r'
-		futureTankState = self.ql.getTankLevelDiscrete(level)
-
-		# We penalize more if we get out of bounds
-		# This is a dumb place to put the extra penalty, it should be integrated into the cost function
-		if currentAction == 1 and futureTankState == 8:
-			Jnext = self.ql.cost(currentAction)*5
-		elif currentAction == 0 and futureTankState == 0:
-			Jnext = self.ql.cost(currentAction)*5
-		else:
-			Jnext = self.ql.cost(currentAction)*5
-
-		# Updating the Q - Value
-		self.Qtable[self.step][tankState][currentAction] = self.Qtable[self.step][tankState][currentAction]+self.learning_rate * \
-			(Jnext+self.discount_factor*self.Qtable[self.step+1][futureTankState][np.argmin(
-				self.Qtable[self.step+1][futureTankState])]-self.Qtable[self.step][tankState][currentAction])
-
-		self.step += 1
+		self.num_running_pumps = self.currentAction
 
 	############### Old Sim-step ##############################
 	# Dh = (self.hmax - self.hmin)/self.num_of_pumps
@@ -112,7 +105,7 @@ for k in range(simSteps):
 	time[k], level[k], pump_station_flow[k], pump_station_pressure[k], pump_station_power[k], demand1[k], demand2[k] = waterNetwork.getMeasurements()
 
 	# Controller
-	controller.simStep(level[k])
+	controller.simStep(level[k], simSteps % 24)
 	if k < simSteps-1:
 		pump_speed[k+1], num_of_running_pumps[k+1] = controller.getOutputs()
 
