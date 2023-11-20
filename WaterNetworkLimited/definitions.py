@@ -8,7 +8,7 @@ class Enviro:
 	tankMinLevel = 0.0
 	costOfOperationPerHour = 1
 	tankDircreteLevels = 8
-	pumpFlowRate=10
+	pumpFlowRate=6
 	noiseStatus=0
 
 	consumption_record=[]
