@@ -10,7 +10,7 @@ import random as rd
 
 class pumpingStationControl:
 	# Setup Q-Learning parameters.
-	descreteStates = 5
+	descreteStates = 7
 
 	def __init__(self, cheating_Total_Iterrations):
 		# Parameters
@@ -25,31 +25,36 @@ class pumpingStationControl:
 		self.totalIterrations = cheating_Total_Iterrations + 1
 
 		# For this itteration the controller makes a decision once per hour.
-		self.Qtable = np.ones((24, self.descreteStates, self.num_of_pumps + 1))
+		self.Qtable = np.ones((25, self.descreteStates, self.num_of_pumps + 1))
 		# epsilon parameter
-		self.epsilon = 0.7  # this approach sucks
-		self.learning_rate = 0.3  # this should also do something.
-		self.discount_factor = 1 # This is probably too high
+		self.epsilon = 0.1 # this should be adjustible
+		self.learning_rate = 0.07  # this should also do something.
+		self.discount_factor = 0.8 # This is probably too high
 
 		# Starting action
 		self.currentAction = 1
 
 		# Initializing Q-learning
-		self.ql = sf.supportFunctions(3.2, self.descreteStates, self.learning_rate, self.discount_factor)
+		self.ql = sf.supportFunctions(10, self.descreteStates, self.learning_rate, self.discount_factor)
 
 	def simStep(self, level, time):
 		# We are updating the Q-values, unless the step = 0
 
+		# Updating controller data
+		tankCurrentState=self.ql.getTankLevelDiscrete(level)
+		
+
 		# Take action a and observe s',r'
+		self.num_running_pumps = self.currentAction
 		tankState = self.ql.getTankLevelDiscrete(level)
 
 		# We penalize more if we get out of bounds
 		reward = self.ql.reward(tankState)
 
 
-		current_Q_value = self.Qtable[time][tankState][self.currentAction]
+		current_Q_value = self.Qtable[time][tankCurrentState][self.currentAction]
 		# Updating the Q - Value
-		self.Qtable[time][tankState][self.currentAction] = self.ql.compute_q(current_Q_value, reward, np.argmax(self.Qtable[time+1][tankState]))
+		self.Qtable[time][tankCurrentState][self.currentAction] = self.ql.compute_q(current_Q_value, reward, np.argmax(self.Qtable[time+1][tankState]))
 		
 		# Sellecting next step
 		optimalAction = np.argmax(self.Qtable[time][tankState])
@@ -60,8 +65,7 @@ class pumpingStationControl:
 		else:
 			self.currentAction = rd.randint(0, self.num_of_pumps) # The -1 is because apparently it includes the number in the random sellection.
 
-		# Updating controller data
-		self.num_running_pumps = self.currentAction
+		
 
 	############### Old Sim-step ##############################
 	# Dh = (self.hmax - self.hmin)/self.num_of_pumps
@@ -79,7 +83,7 @@ class pumpingStationControl:
 print("Initialization of the simulation")
 
 # Simulation settings
-simTime = 40.0*24.0*3600.0
+simTime = 80.0*24.0*3600.0
 
 # Setup instance of the simulation
 waterNetwork = WN.waterSupplyNetworkObject()
@@ -98,14 +102,17 @@ pump_station_power = np.zeros(simSteps)
 pump_speed = np.zeros(simSteps)
 num_of_running_pumps = np.zeros(simSteps)
 
-for k in range(simSteps):
+# Each step has a duration of 15 mins.
+for k in range(simSteps): 
 
 	# Water supply networkx
 	waterNetwork.simStep(pump_speed[k], num_of_running_pumps[k])
 	time[k], level[k], pump_station_flow[k], pump_station_pressure[k], pump_station_power[k], demand1[k], demand2[k] = waterNetwork.getMeasurements()
 
-	# Controller
-	controller.simStep(level[k], simSteps % 24)
+	# Controller is only engaged ever 60 mins
+	if (k % 4 == 0):
+		controller.simStep(level[k], int(k / 4) % 24)
+
 	if k < simSteps-1:
 		pump_speed[k+1], num_of_running_pumps[k+1] = controller.getOutputs()
 
