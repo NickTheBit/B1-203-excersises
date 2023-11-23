@@ -25,7 +25,12 @@ class supportFunctions:
 
 	def reward(self, current_tank_level):
 		# Extreme punishment for exceeding legal limits
-		reward = -abs(self.tankMaxLevel/2 - current_tank_level)
+		if (current_tank_level > self.tankMaxLevel):
+			return  - (current_tank_level - self.tankMaxLevel)**2
+		elif (current_tank_level < 0):
+			return  - current_tank_level **2
+		else:
+			return -abs(self.tankMaxLevel/2 - current_tank_level)
 
 		# This needs to account for cost of operation, but I don't give a shit right now
 		return reward
