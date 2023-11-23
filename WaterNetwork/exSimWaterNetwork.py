@@ -60,9 +60,9 @@ class pumpingStationControl:
 		optimalAction = np.argmax(self.Qtable[time][tankState])
 
 		# Setting epsilon depending on simulation progress
+		# If statement is to avoid division by zero
 		if (step != 0):
 			self.epsilon = 1 - (step / total_steps)
-			print(self.epsilon)
 
 		# This is the espilon-greedy algo.
 		if (rd.random() > self.epsilon):
