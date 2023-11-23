@@ -37,7 +37,7 @@ class pumpingStationControl:
 		# Initializing Q-learning
 		self.ql = sf.supportFunctions(10, self.descreteStates, self.learning_rate, self.discount_factor)
 
-	def simStep(self, level, time):
+	def simStep(self, level, time, step, total_steps):
 		# We are updating the Q-values, unless the step = 0
 
 		# Updating controller data
@@ -58,6 +58,12 @@ class pumpingStationControl:
 		
 		# Sellecting next step
 		optimalAction = np.argmax(self.Qtable[time][tankState])
+
+		# Setting epsilon depending on simulation progress
+		if (step != 0):
+			self.epsilon = 1 - (step / total_steps)
+			print(self.epsilon)
+
 		# This is the espilon-greedy algo.
 		if (rd.random() > self.epsilon):
 			# Optimal sellection based on Q
@@ -83,7 +89,7 @@ class pumpingStationControl:
 print("Initialization of the simulation")
 
 # Simulation settings
-simTime = 80.0*24.0*3600.0
+simTime = 40.0*24.0*3600.0
 
 # Setup instance of the simulation
 waterNetwork = WN.waterSupplyNetworkObject()
@@ -111,7 +117,7 @@ for k in range(simSteps):
 
 	# Controller is only engaged ever 60 mins
 	if (k % 4 == 0):
-		controller.simStep(level[k], int(k / 4) % 24)
+		controller.simStep(level[k], int(k / 4) % 24, k, simSteps)
 
 	if k < simSteps-1:
 		pump_speed[k+1], num_of_running_pumps[k+1] = controller.getOutputs()

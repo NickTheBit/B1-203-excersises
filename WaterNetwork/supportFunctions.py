@@ -1,10 +1,6 @@
 # Here we define all the functions needed for q-learning to function
 
 class supportFunctions:
-	# Tank limits for cost function.
-	lowerLimit=0
-	upperLimit=6
-	
 	def __init__(self, newTankMaxLevel, newTankDescreteLevels, new_learning_rate, new_discount_factor) -> None:
 		self.tankMaxLevel = newTankMaxLevel
 		self.tankDircreteLevels = newTankDescreteLevels
@@ -13,9 +9,8 @@ class supportFunctions:
 		self.discount_factor = new_discount_factor
 
 	def getTankLevelDiscrete(self, newCurrentTankLevel):
-		self.currentTankLevel = newCurrentTankLevel
 		# Compute and map out tank level to discrete states.
-		retVal = int(self.currentTankLevel / self.singleLevelQuantiny)
+		retVal = int(newCurrentTankLevel / self.singleLevelQuantiny)
 
 		# Since no soft limit, the tank will go negative, this patches an underlying problemo
 		# Coding drunk is extremely fun and I highly recomend it.
@@ -26,18 +21,11 @@ class supportFunctions:
 			retVal = self.upperLimit
 
 		return retVal
-	'''
-	def reward(self, tankLevelState):
-		# Extreme punishment for exceeding legal limits
-		reward = max(self.upperLimit - tankLevelState, tankLevelState + self.lowerLimit)
 
-		# This needs to account for cost of operation, but I don't give a shit right now
-		return reward
-	'''
 
-	def reward(self, tankLevelState):
+	def reward(self, current_tank_level):
 		# Extreme punishment for exceeding legal limits
-		reward = -abs(self.tankMaxLevel/2 - self.currentTankLevel)
+		reward = -abs(self.tankMaxLevel/2 - current_tank_level)
 
 		# This needs to account for cost of operation, but I don't give a shit right now
 		return reward
