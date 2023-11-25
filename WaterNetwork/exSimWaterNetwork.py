@@ -6,6 +6,10 @@ import WaterNetwork as WN
 import supportFunctions as sf
 import random as rd
 
+# Visualization packages
+import time
+from rich.progress import track
+
 ### Class defintions ####################################################################################################
 
 class pumpingStationControl:
@@ -64,7 +68,6 @@ class pumpingStationControl:
 		if (step != 0):
 			# self.epsilon = 0.5 - (step / total_steps) / 2
 			self.epsilon = np.log10(10 - (step/total_steps) * 10)
-			print(self.epsilon)
 
 		# This is the espilon-greedy algo.
 		if (rd.random() > self.epsilon):
@@ -73,22 +76,12 @@ class pumpingStationControl:
 		else:
 			self.currentAction = rd.randint(0, self.num_of_pumps) # The -1 is because apparently it includes the number in the random sellection.
 
-		
-
-	############### Old Sim-step ##############################
-	# Dh = (self.hmax - self.hmin)/self.num_of_pumps
-	# if level < Dh*(self.num_of_pumps - self.num_running_pumps - 1.0) + self.hmin :
-	#     self.num_running_pumps = self.num_running_pumps + 1.0
-	# if level > Dh*(self.num_of_pumps - self.num_running_pumps + 1.0) + self.hmin :
-	#     self.num_running_pumps = self.num_running_pumps - 1.0
-	# self.speed = 1
-
 	def getOutputs(self):
 		return self.speed, self.num_running_pumps
 
 
 ### Simulation parameters ##################################################################################################
-print("Initialization of the simulation")
+print("Initializing the simulation.")
 
 # Simulation settings
 simTime = 420.0*24.0*3600.0
@@ -99,7 +92,7 @@ simSteps = int(simTime/waterNetwork.getSampTime())
 controller = pumpingStationControl(simSteps)
 
 ### Simulation ############################################################################################################
-print("Run simulation")
+print("Setting up memory.")
 time = np.zeros(simSteps)
 level = np.zeros(simSteps)
 demand1 = np.zeros(simSteps)
@@ -111,7 +104,7 @@ pump_speed = np.zeros(simSteps)
 num_of_running_pumps = np.zeros(simSteps)
 
 # Each step has a duration of 15 mins.
-for k in range(simSteps): 
+for k in track(range(simSteps), description="Simmulation running..."): 
 
 	# Water supply networkx
 	waterNetwork.simStep(pump_speed[k], num_of_running_pumps[k])
@@ -126,7 +119,6 @@ for k in range(simSteps):
 
 
 ### Plot results ##########################################################################################################
-print("Plot results")
 fig, axs = plt.subplots(5, 1)
 axs[0].plot(time, level, label='Tank Level')
 axs[0].legend()
