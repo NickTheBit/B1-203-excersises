@@ -64,7 +64,7 @@ def startup():
 			LevelHistory.append(env.currentTankLevel)
 	print(len(LevelHistory))
 
-
+	print(env.functionapproximator(QTable))
 	
 			
 		

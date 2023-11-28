@@ -185,4 +185,19 @@ class Enviro:
 		# Compute and map out tank level to discrete states.
 		singleLevelQuantiny = self.tankMaxLevel / self.tankDircreteLevels
 		return int(self.currentTankLevel / singleLevelQuantiny)-1
-	
+	def functionapproximator(self, qval):
+		basew = 1/19
+		w = [basew*1, basew*2, basew*3, basew*4, basew*5, basew*6, basew*7, basew*8, basew*9, basew*10, basew*11, basew*12, basew*13, basew*14, basew*15, basew*16, basew*17, basew*18, basew*19]
+		qestimate = []
+		wqestimate = [[0]*19 for _ in range(19)]
+		Jw = []
+		for k in range(19):
+			qestimate.append(np.exp((-(np.abs((k*0.42)/2-self.currentTankLevel))**2)/2*20))
+			for j in range(19):
+				wqestimate[j][k] = qestimate[k]*w[j]
+		for i in range(19):
+			Jw.append(np.min((qval[0][0:18:1][0] - wqestimate[i])**2)) 
+			# the arrays are not the same size need to find a way to fix
+		return Jw
+
+
