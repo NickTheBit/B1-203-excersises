@@ -1,0 +1,88 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate some random data for value function approximation
+np.random.seed(42)
+state_values = np.linspace(0, 5, 100)
+true_values = 2 * state_values + 1 + np.random.normal(0, 1, size=100)  # Added noise to true values
+
+# Linear approximation function
+def linear_approximation(state, weight):
+    return weight * state
+
+# Stochastic Gradient Descent update function
+def sgd_update(weight, learning_rate, error, state):
+    return weight + learning_rate * error * state
+
+# Set up plot
+plt.figure(figsize=(10, 6))
+
+# Initial weight
+weight_initial = 0.0
+
+# Add noise to true values
+true_values_with_noise = true_values + np.random.normal(0, 0.5, size=len(true_values))
+
+# Plot true values and initial approximation
+plt.plot(state_values, true_values_with_noise, label='True Values (Linear with Noise)', linestyle='solid', linewidth=2)
+plt.xlabel('State')
+plt.ylabel('Value')
+plt.title('Function approximation with SGD (With Noise)')
+
+# Plot initial approximation
+plt.plot(state_values, linear_approximation(state_values, weight_initial),
+         label=f'Initial Approximation (w={weight_initial})', linestyle='solid', alpha=0.7)
+
+# Perform multiple SGD updates
+learning_rate = 0.01
+num_updates = 30  # Change the number of learning rates to 30
+min_cost = float('inf')
+min_cost_weight = None
+
+# Define a clear red color for learning rate points
+color = 'red'
+
+# Mark "Learning Rate Point" label only once
+plt.scatter([], [], color=color, marker='x', label=f'Learning Rate Point')
+
+for i in range(num_updates):
+    random_index = np.random.randint(len(state_values))
+    state = state_values[random_index]
+    true_value = true_values_with_noise[random_index]
+    error = true_value - linear_approximation(state, weight_initial)
+    
+    # Update weight
+    weight_initial = sgd_update(weight_initial, learning_rate, error, state)
+    
+    # Calculate cost
+    cost = np.mean((true_values_with_noise - linear_approximation(state_values, weight_initial))**2)
+    
+    # Update minimum cost and weight
+    if cost < min_cost:
+        min_cost = cost
+        min_cost_weight = weight_initial
+        
+    # Mark learning rates on the graph for every iteration with the same color and 'x' marker
+    plt.scatter(state, true_value, color=color, marker='x', alpha=0.7)
+
+# Plot final approximation with noise
+approx_values_final = linear_approximation(state_values, weight_initial) + np.random.normal(0, 0.5, size=len(state_values))
+plt.plot(state_values, approx_values_final, label=f'Final Approximation (w={weight_initial:.2f})', linestyle='solid', alpha=0.7, color='purple')
+
+# Add annotations for SGD with noise
+plt.scatter(min_cost_weight, min_cost, color='green', marker='o', alpha=0.7)
+plt.annotate(f'Min Cost: {min_cost:.2f}', 
+             xy=(min_cost_weight, min_cost), 
+             xytext=(min_cost_weight, min_cost + 0.2),  # Move the text slightly below the point
+             fontsize=8,
+             color='green',
+             ha='right')
+
+# Move the point to the top
+plt.scatter(min_cost_weight, min_cost, color='green', marker='o', label=f'Minimum Cost (w={min_cost_weight:.2f})', alpha=0.7, zorder=5)
+
+# Add legend for SGD with noise
+plt.legend()
+
+# Show the plot
+plt.show()
