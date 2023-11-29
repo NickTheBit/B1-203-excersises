@@ -8,7 +8,7 @@ class Enviro:
 	tankMinLevel = 0.0
 	costOfOperationPerHour = 1
 	tankDircreteLevels = 8
-	pumpFlowRate=6
+	pumpFlowRate=15
 	noiseStatus=0
 
 	consumption_record=[]
@@ -18,7 +18,7 @@ class Enviro:
 	tankUpperLimit = (tankMaxLevel / tankDircreteLevels) * \
 		(tankDircreteLevels - 1)
 	
-	demandAtenuation=10
+	demandAtenuation=8
 	
 	# Enviroment status
 	currentTankLevel = 100
@@ -138,9 +138,9 @@ class Enviro:
 	
 	def cost(self, flow):
 		# Discrete cost
-		lowerLimit=2
-		upperLimit=4
-		barrierCost = 0
+		lowerLimit=3
+		upperLimit=5
+	
 		if self.currentTankLevel >= upperLimit:
 			barrierCost =(self.currentTankLevel-upperLimit)**2
 		elif self.currentTankLevel <= lowerLimit:
@@ -148,17 +148,17 @@ class Enviro:
 		else:
 			barrierCost = 0
 
-		return flow*self.costOfOperationPerHour+self.pumpFlowRate*2*barrierCost
+		return flow*self.pumpFlowRate+10*(self.pumpFlowRate*barrierCost)
 		
 	def getTankLevelDiscreteVariable(self):
 		
-		steepnes=4 # Steepnes of the non-linear region (steepness of the sigmoid function)
+		steepnes=3 # Steepnes of the non-linear region (steepness of the sigmoid function)
 		N_fine=7 # Number of discrete states in the region of fine discretization
 		spread=1
 
 		#Boundaries
-		lowerBoundary=2
-		higherBoundary=4
+		lowerBoundary=3
+		higherBoundary=5
 
 		# This is a pice wise continuous function from x=[0,Max_h], and consists of two linear regions 
 		# and two sigmoid functions near the boundaries
