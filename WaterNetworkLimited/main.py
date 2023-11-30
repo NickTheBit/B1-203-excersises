@@ -11,7 +11,9 @@ import matplotlib.pyplot as plt
 QTable = np.ones((24, 19, 2))
 LevelHistory=[]
 ActionHistory=[]
+w = np.ones((24 , 19, 2))
 N_days=1000 # Number of days that we are running the simulation
+
 
 
 def startup():
@@ -57,17 +59,21 @@ def startup():
 			# Updating the Q - Value
 			if i <=22:
 				QTable[i][tankState][currentAction] =(1-learning_rate)*QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[i+1][futureTankState][np.argmin(QTable[i+1][futureTankState])]-QTable[i][tankState][currentAction])
-			else:
-				QTable[i][tankState][currentAction] = (1-learning_rate)*QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[0][futureTankState][np.argmin(QTable[0][futureTankState])]-QTable[i][tankState][currentAction])
+				RBFerror = env.RBFerr(QTable[i][tankState][currentAction], w[i][tankState][currentAction], i)
+				w[i][tankState][currentAction] = env.sgd_update(w[i][tankState][currentAction], 0.1, RBFerror, 1)
+				
 
+			else:
+				QTable[i][tankState][currentAction] =(1-learning_rate)*QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[0][futureTankState][np.argmin(QTable[0][futureTankState])]-QTable[i][tankState][currentAction])
+				RBFerror = env.RBFerr(QTable[i][tankState][currentAction], w[i][tankState][currentAction], i)
+				w[i][tankState][currentAction] = env.sgd_update(w[i][tankState][currentAction], 0.1, RBFerror, 1)
+			
 			ActionHistory.append(currentAction*env.pumpFlowRate)
 			LevelHistory.append(env.currentTankLevel)
 	print(len(LevelHistory))
-
-	print(env.functionapproximator(QTable))
 	
 			
-		
+	
 
 	plt.style.use('dark_background')
 
@@ -109,7 +115,24 @@ def startup():
 
 	# Adjust layout to prevent overlap
 	plt.tight_layout()
-	plt.show()
+	waterheight = np.linspace(env.tankMinLevel, env.tankMaxLevel, 800)
+	RBFQ0 = []
+	RBFQ1 = []
+	for g in range(24):
+		RBFQ0.append(env.RBFapprox(w[g,:,0], waterheight))
+	for n in range(24):
+		RBFQ1.append(env.RBFapprox(w[n,:,0], waterheight))
+	
+	plt.figure(3)
+	plt.plot(waterheight, RBFQ0[0],waterheight)
+	plt.xlabel("Water Level")  # X-axis label
+	plt.ylabel("Q")  # Y-axis label
+	plt.title("Q vs Water Level action 0")  # Title for the second subplot
+	plt.figure(4)
+	plt.plot(waterheight, RBFQ1[11],waterheight)
+	plt.xlabel("Water Level")  # X-axis label
+	plt.ylabel("Q")  # Y-axis label
+	plt.title("Q vs Water Level action 1")  # Title for the second subplot	
 
 	
 	

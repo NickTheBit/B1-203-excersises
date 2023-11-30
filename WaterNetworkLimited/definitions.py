@@ -2,6 +2,7 @@
 # For preliminary agent testing
 
 import numpy as np
+import scipy.optimize as optimize
 
 class Enviro:
 	tankMaxLevel = 8.0
@@ -185,19 +186,31 @@ class Enviro:
 		# Compute and map out tank level to discrete states.
 		singleLevelQuantiny = self.tankMaxLevel / self.tankDircreteLevels
 		return int(self.currentTankLevel / singleLevelQuantiny)-1
-	def functionapproximator(self, qval):
-		basew = 1/19
-		w = [basew*1, basew*2, basew*3, basew*4, basew*5, basew*6, basew*7, basew*8, basew*9, basew*10, basew*11, basew*12, basew*13, basew*14, basew*15, basew*16, basew*17, basew*18, basew*19]
+	def RBF(self,center, variable, sigma):
+		return np.exp((-(np.abs(center-variable))**2)/2*sigma)
+	def RBFapprox(self, w, height):
 		qestimate = []
-		wqestimate = [[0]*19 for _ in range(19)]
-		Jw = []
-		for k in range(19):
-			qestimate.append(np.exp((-(np.abs((k*0.42)/2-self.currentTankLevel))**2)/2*20))
+		for h in range(len(height)):
+			qsum = 0
 			for j in range(19):
-				wqestimate[j][k] = qestimate[k]*w[j]
-		for i in range(19):
-			Jw.append(np.min((qval[0][0:18:1][0] - wqestimate[i])**2)) 
-			# the arrays are not the same size need to find a way to fix
-		return Jw
+				qsum += w[j]*self.RBF((j*0.42)/2, height[h], 20)
+			qestimate.append(qsum)
+		return qestimate	
+	def RBFerr(self, qval, w, time):
+		hqestimate = 0
+		tqestimate = 0
+		# Jw = []
+		for k in range(19):
+			hqestimate += np.exp((-(np.abs((k*0.42)/2-self.currentTankLevel))**2)/2*20)
+		for i in range(24):
+			tqestimate += np.exp((-(np.abs((i)-time))**2)/2*25)
+		err = qval - w*(hqestimate)
+		#for i in range(100):
+		#	Jw.append((qval - 0.01*i*qestimate)**2)
+		# minJw = np.argmin(Jw)
+		# the arrays are not the same size need to find a way to fix
+		return err
+	def sgd_update(self, w, learning_rate, error, s):
+		return w + learning_rate * error * s  # Use element-wise multiplication for the error term
 
 
