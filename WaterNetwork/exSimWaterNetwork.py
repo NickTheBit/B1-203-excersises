@@ -3,93 +3,95 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import WaterNetwork as WN
-import supportFunctions as sf
+import SupportFunctions as sf
 import random as rd
 
 # Visualization packages
-import time
 from rich.progress import track
+
 
 ### Class defintions ####################################################################################################
 
-class pumpingStationControl:
-	# Setup Q-Learning parameters.
-	descreteStates = 7
+class PumpingStationControl:
+    # Setup Q-Learning parameters.
+    descreteStates = 7
 
-	def __init__(self, cheating_Total_Iterrations):
-		# Parameters
-		self.hmin = 2.4                # [m] min level in the tank
-		self.hmax = 3.2                # [m] max level in the tank
-		self.num_of_pumps = 3          # Number of pumps in the pumping station (WHY WAS THIS A FLOAT???? DO YOU HAVE HALF PUMPS IN YOUR VILLAGE???)
-		# State initalization
-		self.num_running_pumps = 0.0   # Number of running pumps
-		self.speed = 1.0   # [0-1] Speed of active pumps, I'll politely ignore that for now.
+    def __init__(self, total_iterrations):
+        # Parameters
+        self.hmin = 2.4  # [m] min level in the tank
+        self.hmax = 3.2  # [m] max level in the tank
+        self.num_of_pumps = 3  # Number of pumps in the pumping station (WHY WAS THIS A FLOAT???? DO YOU HAVE HALF PUMPS IN YOUR VILLAGE???)
+        # State initialization
+        self.num_running_pumps = 0.0  # Number of running pumps
+        self.speed = 1.0  # [0-1] Speed of active pumps, I'll politely ignore that for now.
 
-		# Normally we are not aware of the total steps of our array, this is CHEATING
-		self.totalIterrations = cheating_Total_Iterrations + 1
+        # Normally we are not aware of the total steps of our array, this is CHEATING
+        self.total_iterations = total_iterrations + 1
 
-		# For this itteration the controller makes a decision once per hour.
-		self.Qtable = np.ones((25, self.descreteStates, self.num_of_pumps + 1))
-		# epsilon parameter
-		self.epsilon = 0.1 # this should be adjustible
-		self.learning_rate = 0.07  # this should also do something.
-		self.discount_factor = 0.8 # This is probably too high
+        # For this iteration the controller makes a decision once per hour.
+        self.Qtable = np.ones((25, self.descreteStates, self.num_of_pumps + 1))
+        # epsilon parameter
+        self.epsilon = 0.1  # this should be adjustable
+        self.learning_rate = 0.07  # this should also do something.
+        self.discount_factor = 0.8  # This is probably too high
 
-		# Starting action
-		self.currentAction = 1
+        # Starting action
+        self.currentAction = 1
 
-		# Initializing Q-learning
-		self.ql = sf.supportFunctions(10, self.descreteStates, self.learning_rate, self.discount_factor)
+        # Initializing Q-learning
+        self.ql = sf.SupportFunctions(10, self.descreteStates, self.learning_rate, self.discount_factor)
 
-	def simStep(self, water_level, time, step, total_steps):
-		# We are updating the Q-values, unless the step = 0
+    def sim_step(self, water_level, current_time, step, total_steps):
+        # We are updating the Q-values, unless the step = 0
 
-		# Updating controller data
-		tankCurrentState=self.ql.getTankLevelDiscrete(water_level)
-		
+        # Updating controller data
+        tank_current_state = self.ql.getTankLevelDiscrete(water_level)
 
-		# Take action a and observe s',r'
-		self.num_running_pumps = self.currentAction
-		tankState = self.ql.getTankLevelDiscrete(water_level)
+        # Take action a and observe s',r'
+        self.num_running_pumps = self.currentAction
+        tank_state = self.ql.getTankLevelDiscrete(water_level)
 
-		# We penalize more if we get out of bounds
-		reward = self.ql.reward(water_level)
+        # We penalize more if we get out of bounds
+        reward = self.ql.reward(water_level)
 
+        current_q_value = self.Qtable[current_time][tank_current_state][self.currentAction]
+        # Updating the Q - Value
+        self.Qtable[current_time][tank_current_state][self.currentAction] = self.ql.compute_q(current_q_value, reward,
+                                                                                            np.argmax(self.Qtable[
+                                                                                                          current_time + 1][
+                                                                                                          tank_state]))
 
-		current_Q_value = self.Qtable[time][tankCurrentState][self.currentAction]
-		# Updating the Q - Value
-		self.Qtable[time][tankCurrentState][self.currentAction] = self.ql.compute_q(current_Q_value, reward, np.argmax(self.Qtable[time+1][tankState]))
-		
-		# Sellecting next step
-		optimalAction = np.argmax(self.Qtable[time][tankState])
+        # Selecting next step
+        optimalAction = np.argmax(self.Qtable[current_time][tank_state])
 
-		# Setting epsilon depending on simulation progress
-		# If statement is to avoid division by zero
-		if (step != 0):
-			# self.epsilon = 0.5 - (step / total_steps) / 2
-			self.epsilon = np.log10(10 - (step/total_steps) * 10)
+        # Setting epsilon depending on simulation progress
+        # If statement is to avoid division by zero
+        if step != 0:
+            # self.epsilon = (step / total_steps)
+            self.epsilon = np.log10(10 - (step / total_steps) * 10)
 
-		# This is the espilon-greedy algo.
-		if (rd.random() > self.epsilon):
-			# Optimal sellection based on Q
-			self.currentAction = optimalAction
-		else:
-			self.currentAction = rd.randint(0, self.num_of_pumps) # The -1 is because apparently it includes the number in the random sellection.
+        # This is the epsilon-greedy algo.
+        if rd.random() > self.epsilon:
+            # Optimal selection based on Q
+            self.currentAction = optimalAction
+        else:
+            self.currentAction = rd.randint(0,
+                                            self.num_of_pumps)  # The -1 is because apparently it includes the number in the random sellection.
 
-	def getOutputs(self):
-		return self.speed, self.num_running_pumps
+    def get_outputs(self):
+        return self.speed, self.num_running_pumps
 
 
 ### Simulation parameters ##################################################################################################
 print("Initializing the simulation.")
 
 # Simulation settings
-simTime = 420.0*24.0*3600.0
+simTime = 40.0 * 24.0 * 3600.0
 
 # Setup instance of the simulation
 waterNetwork = WN.waterSupplyNetworkObject()
-simSteps = int(simTime/waterNetwork.getSampTime())
-controller = pumpingStationControl(simSteps)
+simSteps = int(simTime / waterNetwork.getSampTime())
+controller = PumpingStationControl(simSteps)
 
 ### Simulation ############################################################################################################
 print("Setting up memory.")
@@ -104,19 +106,19 @@ pump_speed = np.zeros(simSteps)
 num_of_running_pumps = np.zeros(simSteps)
 
 # Each step has a duration of 15 mins.
-for k in track(range(simSteps), description="Simmulation running..."): 
+for k in track(range(simSteps), description="Simulation running..."):
 
-	# Water supply networkx
-	waterNetwork.simStep(pump_speed[k], num_of_running_pumps[k])
-	time[k], level[k], pump_station_flow[k], pump_station_pressure[k], pump_station_power[k], demand1[k], demand2[k] = waterNetwork.getMeasurements()
+    # Water supply networkx
+    waterNetwork.simStep(pump_speed[k], num_of_running_pumps[k])
+    time[k], level[k], pump_station_flow[k], pump_station_pressure[k], pump_station_power[k], demand1[k], demand2[
+        k] = waterNetwork.getMeasurements()
 
-	# Controller is only engaged ever 60 mins
-	if (k % 4 == 0):
-		controller.simStep(level[k], int(k / 4) % 24, k, simSteps)
+    # Controller is only engaged every 60 minutes
+    if k % 4 == 0:
+        controller.sim_step(level[k], int(k / 4) % 24, k, simSteps)
 
-	if k < simSteps-1:
-		pump_speed[k+1], num_of_running_pumps[k+1] = controller.getOutputs()
-
+    if k < simSteps - 1:
+        pump_speed[k + 1], num_of_running_pumps[k + 1] = controller.get_outputs()
 
 ### Plot results ##########################################################################################################
 fig, axs = plt.subplots(5, 1)
@@ -140,4 +142,3 @@ axs[4].set_ylabel("power [KW]")
 axs[4].set_xlabel("time [sec]")
 
 plt.show()
-
