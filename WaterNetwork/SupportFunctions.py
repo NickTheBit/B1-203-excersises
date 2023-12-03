@@ -5,10 +5,11 @@ class SupportFunctions:
         self.tankMaxLevel = new_tank_max_level
         self.tankDiscreteLevels = new_tank_discrete_levels
         self.singleLevelQuantity = self.tankMaxLevel / self.tankDiscreteLevels
+        self.state_upper_limit = new_tank_discrete_levels
         self.learning_rate = new_learning_rate
         self.discount_factor = new_discount_factor
 
-    def getTankLevelDiscrete(self, new_current_tank_level):
+    def get_tank_level_discrete(self, new_current_tank_level):
         # Compute and map out tank level to discrete states.
         return_value = int(new_current_tank_level / self.singleLevelQuantity)
 
@@ -18,7 +19,7 @@ class SupportFunctions:
             return_value = 0
 
         if return_value > self.tankMaxLevel:
-            return_value = self.upperLimit
+            return_value = self.state_upper_limit
 
         return return_value
 

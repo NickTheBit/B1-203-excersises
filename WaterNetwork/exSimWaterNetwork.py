@@ -16,7 +16,7 @@ class PumpingStationControl:
     # Setup Q-Learning parameters.
     descreteStates = 7
 
-    def __init__(self, total_iterrations):
+    def __init__(self, total_iterations):
         # Parameters
         self.hmin = 2.4  # [m] min level in the tank
         self.hmax = 3.2  # [m] max level in the tank
@@ -26,7 +26,7 @@ class PumpingStationControl:
         self.speed = 1.0  # [0-1] Speed of active pumps, I'll politely ignore that for now.
 
         # Normally we are not aware of the total steps of our array, this is CHEATING
-        self.total_iterations = total_iterrations + 1
+        self.total_iterations = total_iterations + 1
 
         # For this iteration the controller makes a decision once per hour.
         self.Qtable = np.ones((25, self.descreteStates, self.num_of_pumps + 1))
@@ -45,11 +45,11 @@ class PumpingStationControl:
         # We are updating the Q-values, unless the step = 0
 
         # Updating controller data
-        tank_current_state = self.ql.getTankLevelDiscrete(water_level)
+        tank_current_state = self.ql.get_tank_level_discrete(water_level)
 
         # Take action a and observe s',r'
         self.num_running_pumps = self.currentAction
-        tank_state = self.ql.getTankLevelDiscrete(water_level)
+        tank_state = self.ql.get_tank_level_discrete(water_level)
 
         # We penalize more if we get out of bounds
         reward = self.ql.reward(water_level)
@@ -62,7 +62,7 @@ class PumpingStationControl:
                                                                                                           tank_state]))
 
         # Selecting next step
-        optimalAction = np.argmax(self.Qtable[current_time][tank_state])
+        optimal_action = np.argmax(self.Qtable[current_time][tank_state])
 
         # Setting epsilon depending on simulation progress
         # If statement is to avoid division by zero
@@ -73,7 +73,7 @@ class PumpingStationControl:
         # This is the epsilon-greedy algo.
         if rd.random() > self.epsilon:
             # Optimal selection based on Q
-            self.currentAction = optimalAction
+            self.currentAction = optimal_action
         else:
             self.currentAction = rd.randint(0,
                                             self.num_of_pumps)  # The -1 is because apparently it includes the number in the random sellection.
@@ -105,7 +105,7 @@ pump_station_power = np.zeros(simSteps)
 pump_speed = np.zeros(simSteps)
 num_of_running_pumps = np.zeros(simSteps)
 
-# Each step has a duration of 15 mins.
+# Each step has a duration of 15 minutes.
 for k in track(range(simSteps), description="Simulation running..."):
 
     # Water supply networkx
