@@ -3,15 +3,18 @@
 
 import numpy as np
 import scipy.optimize as optimize
-
+import pandas as pd
 class Enviro:
 	tankMaxLevel = 8.0
 	tankMinLevel = 0.0
 	costOfOperationPerHour = 1
 	tankDircreteLevels = 8
-	pumpFlowRate=6
+	pumpFlowRate=15
 	noiseStatus=0
-
+	RBFweights0 = pd.read_csv('action0weightsRBF.csv', header=None)
+	RBFweights1 = pd.read_csv('action1weightsRBF.csv', header=None)
+	RBFweights0 = RBFweights0.values
+	RBFweights1 = RBFweights1.values
 	consumption_record=[]
 
 	# Safe zone
@@ -153,13 +156,13 @@ class Enviro:
 		
 	def getTankLevelDiscreteVariable(self):
 		
-		steepnes=4 # Steepnes of the non-linear region (steepness of the sigmoid function)
+		steepnes=3 # Steepnes of the non-linear region (steepness of the sigmoid function)
 		N_fine=7 # Number of discrete states in the region of fine discretization
 		spread=1
 
 		#Boundaries
-		lowerBoundary=2
-		higherBoundary=4
+		lowerBoundary=3
+		higherBoundary=5
 
 		# This is a pice wise continuous function from x=[0,Max_h], and consists of two linear regions 
 		# and two sigmoid functions near the boundaries
@@ -188,12 +191,21 @@ class Enviro:
 		return int(self.currentTankLevel / singleLevelQuantiny)-1
 	def RBF(self,center, variable, sigma):
 		return np.exp((-(np.abs(center-variable))**2)/2*sigma)
+	def RBFQfunctionapproximation(self, time, action):
+		qsum = 0
+		if action == 0:
+			w = self.RBFweights0[time,:]
+		else:
+			w = self.RBFweights1[time,:]
+		for j in range(18):
+			qsum += w[j]*self.RBF((j*0.42), self.currentTankLevel, 20)
+		return qsum
 	def RBFapprox(self, w, height):
 		qestimate = []
 		for h in range(len(height)):
 			qsum = 0
 			for j in range(19):
-				qsum += w[j]*self.RBF((j*0.42)/2, height[h], 20)
+				qsum += w[j]*self.RBF((j*0.42), height[h], 20)
 			qestimate.append(qsum)
 		return qestimate	
 	def RBFerr(self, qval, w, time):

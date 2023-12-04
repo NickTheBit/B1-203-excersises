@@ -6,9 +6,10 @@ import numpy as np
 import definitions as d
 import random as rd
 import matplotlib.pyplot as plt
+import pandas as pd
 
 # Q(time,tankLevel,pump enabled)
-QTable = np.ones((24, 19, 2))
+QTable = np.zeros((24, 19, 2))
 LevelHistory=[]
 ActionHistory=[]
 w = np.ones((24 , 19, 2))
@@ -18,23 +19,29 @@ N_days=1000 # Number of days that we are running the simulation
 
 def startup():
 	# Initializing environment
-	env = d.Enviro(1, 20,0) # arguments: initial tank level, pump status, noise status (either 0 or 1)
+	env = d.Enviro(5, 20,1) # arguments: initial tank level, pump status, noise status (either 0 or 1)
 
 	# Learning parameters
-	learning_rate = 0.07
+	learning_rate = 0.7
 	discount_factor = 0.8
 	x_intersect=100 # day at which epsilon decays to 0
 	a=9/x_intersect
-
 	for j in range(0,N_days+1):
 		# Looping over every state, lol
 		for i in range(0, 23+1):
 			# Mapping out the tank
 			tankState = env.getTankLevelDiscreteVariable()
 			epsilon=1-np.log10(a*j+1) # logaritmic decay
-			optimalAction=np.argmin(QTable[i][tankState])
+			Q0 = env.RBFQfunctionapproximation(i, 0)
+			Q1 = env.RBFQfunctionapproximation(i, 1)
+			if Q0 <= Q1:
+				optimalAction = 0
+			else:
+				optimalAction = 1
+			#optimalAction=np.argmin(QTable[i][tankState])
+
 			# This is the espilon-greedy algo.
-			if (rd.random() > epsilon):
+			if (rd.random() >= epsilon):
 				# Optimal sellection based on Q
 				currentAction = optimalAction
 				
@@ -57,21 +64,27 @@ def startup():
 			
 
 			# Updating the Q - Value
-			if i <=22:
-				QTable[i][tankState][currentAction] =(1-learning_rate)*QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[i+1][futureTankState][np.argmin(QTable[i+1][futureTankState])]-QTable[i][tankState][currentAction])
-				RBFerror = env.RBFerr(QTable[i][tankState][currentAction], w[i][tankState][currentAction], i)
-				w[i][tankState][currentAction] = env.sgd_update(w[i][tankState][currentAction], 0.1, RBFerror, 1)
+			#if i <=22:
+			#	QTable[i][tankState][currentAction] =(1-learning_rate)*QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[i+1][futureTankState][np.argmin(QTable[i+1][futureTankState])]-QTable[i][tankState][currentAction])
+				#RBFerror = env.RBFerr(QTable[i][tankState][currentAction], w[i][tankState][currentAction], i)
+				#w[i][tankState][currentAction] = env.sgd_update(w[i][tankState][currentAction], 0.1, RBFerror, 1)
 				
 
-			else:
-				QTable[i][tankState][currentAction] =(1-learning_rate)*QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[0][futureTankState][np.argmin(QTable[0][futureTankState])]-QTable[i][tankState][currentAction])
-				RBFerror = env.RBFerr(QTable[i][tankState][currentAction], w[i][tankState][currentAction], i)
-				w[i][tankState][currentAction] = env.sgd_update(w[i][tankState][currentAction], 0.1, RBFerror, 1)
+			#else:
+			#	QTable[i][tankState][currentAction] =(1-learning_rate)*QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[0][futureTankState][np.argmin(QTable[0][futureTankState])]-QTable[i][tankState][currentAction])
+				#RBFerror = env.RBFerr(QTable[i][tankState][currentAction], w[i][tankState][currentAction], i)
+				#w[i][tankState][currentAction] = env.sgd_update(w[i][tankState][currentAction], 0.1, RBFerror, 1)
 			
 			ActionHistory.append(currentAction*env.pumpFlowRate)
 			LevelHistory.append(env.currentTankLevel)
 	print(len(LevelHistory))
 	
+	#df_action_0=pd.DataFrame(w[:,:,0])
+	#df_action_1=pd.DataFrame(w[:,:,1])
+
+	# Save the DataFrame to a CSV file
+	#df_action_0.to_csv('action0weightsRBF.csv', index=False, header=False)	
+	#df_action_1.to_csv('action1weightsRBF.csv', index=False, header=False)	
 			
 	
 
@@ -137,8 +150,6 @@ def startup():
 	plt.title("Q vs Water Level action 1")  # Title for the second subplot	
 	plt.show()
 
-	
-	
 	
 	
 
