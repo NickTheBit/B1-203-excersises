@@ -13,6 +13,8 @@ from rich.progress import track
 ### Class defintions ####################################################################################################
 
 class PumpingStationControl:
+    sumAvg = 0
+    sumCount = 0
 
     def __init__(self, total_iterations, conf):
         # Parameters
@@ -49,7 +51,6 @@ class PumpingStationControl:
 
         # Take action a and observe s',r'
         self.num_running_pumps = self.currentAction
-        tank_state = self.ql.get_tank_level_discrete(water_level)
 
         # We penalize more if we get out of bounds
         reward = self.ql.reward(water_level)
@@ -59,10 +60,10 @@ class PumpingStationControl:
         self.Qtable[current_time][tank_current_state][self.currentAction] = self.ql.compute_q(current_q_value, reward,
                                                                                               np.argmax(self.Qtable[
                                                                                                             current_time + 1][
-                                                                                                            tank_state]))
+                                                                                                            tank_current_state]))
 
         # Selecting next step
-        optimal_action = np.argmax(self.Qtable[current_time][tank_state])
+        optimal_action = np.argmax(self.Qtable[current_time][tank_current_state])
 
         # Setting epsilon depending on simulation progress
         # If statement is to avoid division by zero
@@ -77,8 +78,16 @@ class PumpingStationControl:
         else:
             self.currentAction = rd.randint(0, self.num_of_pumps)
 
+        # Evaluation section
+        if self.epsilon < 0.10:
+            self.sumAvg += self.ql.reward(water_level)
+            self.sumCount += 1
+
     def get_outputs(self):
         return self.speed, self.num_running_pumps
+
+    def get_performance(self):
+        return self.sumAvg / self.sumCount
 
     def vis_q_table(self):
         fig, ax = plt.subplots()
@@ -91,7 +100,6 @@ class PumpingStationControl:
 
 
 def run_simulation(sim_config):
-
     ### Simulation parameters ###
     print("Initializing the simulation.")
     # Simulation settings
@@ -126,6 +134,8 @@ def run_simulation(sim_config):
 
         if k < sim_steps - 1:
             pump_speed[k + 1], num_of_running_pumps[k + 1] = controller.get_outputs()
+
+    print(controller.get_performance())
 
     if sim_config.performance_map:
         controller.vis_q_table()
