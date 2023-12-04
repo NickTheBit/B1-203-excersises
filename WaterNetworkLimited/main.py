@@ -31,9 +31,16 @@ def startup():
 		for i in range(0, 23+1):
 			# Mapping out the tank
 			tankState = env.getTankLevelDiscreteVariable()
-			epsilon=1-np.log10(a*j+1) # logaritmic decay
-			optimalAction=np.argmin(QTable[i][tankState])
+			epsilon=0#1-np.log10(a*j+1) # logaritmic decay
+			#optimalAction=np.argmin(QTable[i][tankState])
 			# This is the espilon-greedy algo.
+			Q0 = env.RBFQfunctionapproximation(i, 0)
+			Q1 = env.RBFQfunctionapproximation(i, 1)
+			if Q0 <= Q1:
+				optimalAction = 0
+			else:
+				optimalAction = 1
+			
 			if (rd.random() > epsilon):
 				# Optimal sellection based on Q
 				currentAction = optimalAction
@@ -59,26 +66,28 @@ def startup():
 			# Updating the Q - Value
 			if i <=22:
 				QTable[i][tankState][currentAction] =(1-learning_rate)*QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[i+1][futureTankState][np.argmin(QTable[i+1][futureTankState])]-QTable[i][tankState][currentAction])
-				RBFerror = env.RBFerr(QTable[i][tankState][currentAction], w[i][tankState][currentAction], i)
-				w[i][tankState][currentAction] = env.sgd_update(w[i][tankState][currentAction], 0.1, RBFerror, 1)
+			#	RBFerror = env.RBFerr(QTable[i][tankState][currentAction], w[i][tankState][currentAction], i)
+			#	w[i][tankState][currentAction] = env.sgd_update(w[i][tankState][currentAction], 0.1, RBFerror, 1)
 				
 
-			else:
-				QTable[i][tankState][currentAction] =(1-learning_rate)*QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[0][futureTankState][np.argmin(QTable[0][futureTankState])]-QTable[i][tankState][currentAction])
-				RBFerror = env.RBFerr(QTable[i][tankState][currentAction], w[i][tankState][currentAction], i)
-				w[i][tankState][currentAction] = env.sgd_update(w[i][tankState][currentAction], 0.1, RBFerror, 1)
+			#else:
+			#	QTable[i][tankState][currentAction] =(1-learning_rate)*QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[0][futureTankState][np.argmin(QTable[0][futureTankState])]-QTable[i][tankState][currentAction])
+			#	RBFerror = env.RBFerr(QTable[i][tankState][currentAction], w[i][tankState][currentAction], i)
+			#	w[i][tankState][currentAction] = env.sgd_update(w[i][tankState][currentAction], 0.1, RBFerror, 1)
 			
 			ActionHistory.append(currentAction*env.pumpFlowRate)
 			LevelHistory.append(env.currentTankLevel)
 	print(len(LevelHistory))
-	RDFweights0=pd.DataFrame(w[:,:,0])
-	RDFweights1=pd.DataFrame(w[:,:,1])
+	#RDFweights0=pd.DataFrame(w[:,:,0])
+	#RDFweights1=pd.DataFrame(w[:,:,1])
 
 
     # Save the DataFrame to a CSV file
-	RDFweights0.to_csv('RDFweights0.csv', index=False, header=False)
-	RDFweights1.to_csv('RDFweights1.csv', index=False, header=False)		
-	
+	#RDFweights0.to_csv('RDFweights0.csv', index=False, header=False)
+	#RDFweights1.to_csv('RDFweights1.csv', index=False, header=False)		
+	#To save the last QTable
+    # Convert the array to a DataFrame
+    #df = pd.DataFrame(np.max(QTable, axis=2))
 
 	plt.style.use('dark_background')
 

@@ -3,7 +3,7 @@
 
 import numpy as np
 import scipy.optimize as optimize
-
+import pandas as pd
 class Enviro:
 	tankMaxLevel = 8.0
 	tankMinLevel = 0.0
@@ -11,7 +11,10 @@ class Enviro:
 	tankDircreteLevels = 8
 	pumpFlowRate=6
 	noiseStatus=0
-
+	RBFweights0 = pd.read_csv('RDFweights0.csv', header=None)
+	RBFweights1 = pd.read_csv('RDFweights1.csv', header=None)
+	RBFweights0 = RBFweights0.values
+	RBFweights1 = RBFweights1.values
 	consumption_record=[]
 
 	# Safe zone
@@ -188,6 +191,15 @@ class Enviro:
 		return int(self.currentTankLevel / singleLevelQuantiny)-1
 	def RBF(self,center, variable, sigma):
 		return np.exp((-(np.abs(center-variable))**2)/2*sigma)
+	def RBFQfunctionapproximation(self, time, action):
+		qsum = 0
+		if action == 0:
+			w = self.RBFweights0[time,:]
+		else:
+			w = self.RBFweights1[time,:]
+		for j in range(18):
+			qsum += w[j]*self.RBF((j*0.42), self.currentTankLevel, 20)
+		return qsum
 	def RBFapprox(self, w, height):
 		qestimate = []
 		for h in range(len(height)):
