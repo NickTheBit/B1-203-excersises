@@ -2,7 +2,7 @@
 
 class SimulationConfig:
     # Simulation parameters
-    simulation_duration_days = 40
+    simulation_duration_days = 128
 
     # Learning parameters
     epsilon = 0.1  # this should be adjustable
@@ -11,6 +11,10 @@ class SimulationConfig:
 
     # Controller Parameters
     discrete_water_levels = 7
+
+    # Visualization parameters
+    plot_events = True
+    performance_map = True
 
     def __init__(self):
         pass

@@ -80,6 +80,15 @@ class PumpingStationControl:
     def get_outputs(self):
         return self.speed, self.num_running_pumps
 
+    def vis_q_table(self):
+        fig, ax = plt.subplots()
+
+        averaged_data = np.mean(self.Qtable, axis=2)
+        averaged_data = np.rot90(averaged_data)
+
+        im = ax.imshow(averaged_data, cmap="viridis")
+        plt.show()
+
 
 def run_simulation(sim_config):
 
@@ -103,6 +112,7 @@ def run_simulation(sim_config):
     pump_station_power = np.zeros(sim_steps)
     pump_speed = np.zeros(sim_steps)
     num_of_running_pumps = np.zeros(sim_steps)
+
     # Each step has a duration of 15 minutes.
     for k in track(range(sim_steps), description="Simulation running..."):
         # Water supply network
@@ -117,22 +127,26 @@ def run_simulation(sim_config):
         if k < sim_steps - 1:
             pump_speed[k + 1], num_of_running_pumps[k + 1] = controller.get_outputs()
 
-    ### Plot results ###
-    fig, axs = plt.subplots(3, 1)
-    axs[0].plot(time, level, label='Tank Level')
-    axs[0].legend()
-    axs[0].grid()
-    axs[0].set_ylabel("level [m]")
-    axs[1].plot(time, pump_station_flow, label='pump flow')
-    axs[1].plot(time, demand1, label='demand flow 1')
-    axs[1].plot(time, demand2, label='demand flow 2')
-    axs[1].legend()
-    axs[1].set_ylabel("flow [m3/h]")
-    axs[2].plot(time, pump_station_power, label='pump speed')
-    axs[2].legend()
-    axs[2].set_ylabel("power [KW]")
-    axs[2].set_xlabel("time [sec]")
-    plt.show()
+    if sim_config.performance_map:
+        controller.vis_q_table()
+
+    if sim_config.plot_events:
+        ### Plot results ###
+        fig, axs = plt.subplots(3, 1)
+        axs[0].plot(time, level, label='Tank Level')
+        axs[0].legend()
+        axs[0].grid()
+        axs[0].set_ylabel("level [m]")
+        axs[1].plot(time, pump_station_flow, label='pump flow')
+        axs[1].plot(time, demand1, label='demand flow 1')
+        axs[1].plot(time, demand2, label='demand flow 2')
+        axs[1].legend()
+        axs[1].set_ylabel("flow [m3/h]")
+        axs[2].plot(time, pump_station_power, label='pump speed')
+        axs[2].legend()
+        axs[2].set_ylabel("power [KW]")
+        axs[2].set_xlabel("time [sec]")
+        plt.show()
 
 
 if __name__ == "__main__":
