@@ -193,7 +193,7 @@ class Enviro:
 		for h in range(len(height)):
 			qsum = 0
 			for j in range(19):
-				qsum += w[j]*self.RBF((j*0.42)/2, height[h], 20)
+				qsum += w[j]*self.RBF((j*0.42), height[h], 20)
 			qestimate.append(qsum)
 		return qestimate	
 	def RBFerr(self, qval, w, time):
@@ -201,7 +201,7 @@ class Enviro:
 		tqestimate = 0
 		# Jw = []
 		for k in range(19):
-			hqestimate += np.exp((-(np.abs((k*0.42)/2-self.currentTankLevel))**2)/2*20)
+			hqestimate += np.exp((-(np.abs((k*0.42)-self.currentTankLevel))**2)/2*20)
 		for i in range(24):
 			tqestimate += np.exp((-(np.abs((i)-time))**2)/2*25)
 		err = qval - w*(hqestimate)

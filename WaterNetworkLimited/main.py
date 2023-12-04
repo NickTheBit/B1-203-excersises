@@ -6,9 +6,9 @@ import numpy as np
 import definitions as d
 import random as rd
 import matplotlib.pyplot as plt
-
+import pandas as pd
 # Q(time,tankLevel,pump enabled)
-QTable = np.ones((24, 19, 2))
+QTable = np.zeros((24, 19, 2))
 LevelHistory=[]
 ActionHistory=[]
 w = np.ones((24 , 19, 2))
@@ -18,12 +18,12 @@ N_days=1000 # Number of days that we are running the simulation
 
 def startup():
 	# Initializing environment
-	env = d.Enviro(1, 20,0) # arguments: initial tank level, pump status, noise status (either 0 or 1)
+	env = d.Enviro(8, 20,0) # arguments: initial tank level, pump status, noise status (either 0 or 1)
 
 	# Learning parameters
-	learning_rate = 0.07
+	learning_rate = 0.1
 	discount_factor = 0.8
-	x_intersect=100 # day at which epsilon decays to 0
+	x_intersect=500 # day at which epsilon decays to 0
 	a=9/x_intersect
 
 	for j in range(0,N_days+1):
@@ -71,8 +71,13 @@ def startup():
 			ActionHistory.append(currentAction*env.pumpFlowRate)
 			LevelHistory.append(env.currentTankLevel)
 	print(len(LevelHistory))
-	
-			
+	RDFweights0=pd.DataFrame(w[:,:,0])
+	RDFweights1=pd.DataFrame(w[:,:,1])
+
+
+    # Save the DataFrame to a CSV file
+	RDFweights0.to_csv('RDFweights0.csv', index=False, header=False)
+	RDFweights1.to_csv('RDFweights1.csv', index=False, header=False)		
 	
 
 	plt.style.use('dark_background')
