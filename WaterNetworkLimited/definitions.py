@@ -191,12 +191,12 @@ class Enviro:
 		return int(self.currentTankLevel / singleLevelQuantiny)-1
 	def RBF(self,center, variable, sigma):
 		return np.exp((-(np.abs(center-variable))**2)/2*sigma)
-	def RBFQfunctionapproximation(self, time, action):
+	def RBFQfunctionapproximation(self, w):
 		qsum = 0
-		if action == 0:
-			w = self.RBFweights0[time,:]
-		else:
-			w = self.RBFweights1[time,:]
+		#if action == 0:
+		#	w = self.RBFweights0[time,:]
+		#else:
+		#	w = self.RBFweights1[time,:]
 		for j in range(18):
 			qsum += w[j]*self.RBF((j*0.42), self.currentTankLevel, 20)
 		return qsum
@@ -204,7 +204,7 @@ class Enviro:
 		qestimate = []
 		for h in range(len(height)):
 			qsum = 0
-			for j in range(19):
+			for j in range(18):
 				qsum += w[j]*self.RBF((j*0.42), height[h], 20)
 			qestimate.append(qsum)
 		return qestimate	
@@ -212,11 +212,11 @@ class Enviro:
 		hqestimate = 0
 		tqestimate = 0
 		# Jw = []
-		for k in range(19):
-			hqestimate += np.exp((-(np.abs((k*0.42)-self.currentTankLevel))**2)/2*20)
+		for k in range(18):
+			hqestimate += w[k]*np.exp((-(np.abs((k*0.42)-self.currentTankLevel))**2)/2*20)
 		for i in range(24):
 			tqestimate += np.exp((-(np.abs((i)-time))**2)/2*25)
-		err = qval - w*(hqestimate)
+		err = qval - hqestimate
 		#for i in range(100):
 		#	Jw.append((qval - 0.01*i*qestimate)**2)
 		# minJw = np.argmin(Jw)
