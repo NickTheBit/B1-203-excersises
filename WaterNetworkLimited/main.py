@@ -11,7 +11,7 @@ import pandas as pd
 QTable = np.zeros((24, 19, 2))
 LevelHistory=[]
 ActionHistory=[]
-w = np.ones((24 , 19, 2))
+w = np.zeros((24 , 19, 2))
 N_days=1000 # Number of days that we are running the simulation
 
 
@@ -22,8 +22,8 @@ def startup():
 
 	# Learning parameters
 	learning_rate = 0.1
-	discount_factor = 0.8
-	x_intersect=500 # day at which epsilon decays to 0
+	discount_factor = 0.5
+	x_intersect=100 # day at which epsilon decays to 0
 	a=9/x_intersect
 
 	for j in range(0,N_days+1):
@@ -60,24 +60,25 @@ def startup():
 			elif currentAction==0 and futureTankState==0:
 				Jnext=env.cost(currentAction)*5
 			else:
-				Jnext=env.cost(currentAction)*5
+				Jnext=env.cost(currentAction)
 				
 			
 
 			# Updating the Q - Value
 			if i <=22:
 				QTable[i][tankState][currentAction] =(1-learning_rate)*QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[i+1][futureTankState][np.argmin(QTable[i+1][futureTankState])]-QTable[i][tankState][currentAction])	
-				Qest = Jnext + discount_factor*env.RBFQfunctionapproximation(w[i+1,:,currentAction])
-
+				Qest = Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[i+1,:,1]), env.RBFQfunctionapproximation(w[i+1,:,0])])
+				#Qest = (1-learning_rate)*env.RBFQfunctionapproximation(w[i,:,currentAction])+learning_rate*(Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[i+1,:,1]), env.RBFQfunctionapproximation(w[i+1,:,0])])-env.RBFQfunctionapproximation(w[i,:,currentAction]))
 				RBFerror = env.RBFerr(Qest, w[i,:,currentAction], i)
 				w[i,tankState,currentAction] = env.sgd_update(w[i,tankState,currentAction], learning_rate, RBFerror, 1)
 				
 
 			else:
 				QTable[i][tankState][currentAction] =(1-learning_rate)*QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[0][futureTankState][np.argmin(QTable[0][futureTankState])]-QTable[i][tankState][currentAction])
-				Qest = Jnext + discount_factor*env.RBFQfunctionapproximation(w[0,:,currentAction])
+				Qest = Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[0,:,1]), env.RBFQfunctionapproximation(w[0,:,0])])
+				#Qest = (1-learning_rate)*env.RBFQfunctionapproximation(w[i,:,currentAction])+learning_rate*(Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[0,:,1]), env.RBFQfunctionapproximation(w[0,:,0])])-env.RBFQfunctionapproximation(w[i,:,currentAction]))
 				RBFerror = env.RBFerr(Qest, w[i,:,currentAction], i)
-				w[i,tankState,currentAction] = env.sgd_update(w[i,tankState,currentAction], learning_rate, RBFerror, 1)
+				w[i,tankState,currentAction] = env.sgd_update(w[i,tankState,currentAction], learning_rate, RBFerror, env.RBF(tankState*0.42, env.currentTankLevel, 20))
 			
 			ActionHistory.append(currentAction*env.pumpFlowRate)
 			LevelHistory.append(env.currentTankLevel)
