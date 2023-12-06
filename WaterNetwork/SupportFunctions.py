@@ -23,17 +23,18 @@ class SupportFunctions:
 
         return return_value
 
-    def reward(self, current_tank_level):
+    def cost(self, current_tank_level):
         # Extreme punishment for exceeding legal limits
         if current_tank_level > self.tankMaxLevel:
-            return - (current_tank_level - self.tankMaxLevel) ** 2
+            return (current_tank_level - self.tankMaxLevel) ** 2
         elif current_tank_level < self.tankMinLevel:
-            return - current_tank_level ** 2
+            return current_tank_level ** 2
         else:
-            return -abs(self.tankMaxLevel / 2 - current_tank_level)
+            return 0
 
     # This needs to account for cost of operation, but I don't give a shit right now
 
-    def compute_q(self, current_value, reward, estimate_optimal_future_value):
+    def compute_q(self, current_value, cost, estimate_optimal_future_value):
+        reward = -cost
         return (1 - self.learning_rate) * current_value + self.learning_rate * (
                     reward + self.discount_factor * estimate_optimal_future_value)

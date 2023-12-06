@@ -2,7 +2,7 @@
 
 class SimulationConfig:
     # Simulation parameters
-    simulation_duration_days = 40
+    simulation_duration_days = 120
 
     # Learning parameters
     epsilon = 0.1  # this should be adjustable
@@ -15,6 +15,7 @@ class SimulationConfig:
     # Visualization parameters
     plot_events = True
     performance_map = False
+    saveGraphs = False
 
     def __init__(self):
         pass

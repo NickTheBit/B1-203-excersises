@@ -53,11 +53,11 @@ class PumpingStationControl:
         self.num_running_pumps = self.currentAction
 
         # We penalize more if we get out of bounds
-        reward = self.ql.reward(water_level)
+        cost = self.ql.cost(water_level)
 
         current_q_value = self.Qtable[current_time][tank_current_state][self.currentAction]
         # Updating the Q - Value
-        self.Qtable[current_time][tank_current_state][self.currentAction] = self.ql.compute_q(current_q_value, reward,
+        self.Qtable[current_time][tank_current_state][self.currentAction] = self.ql.compute_q(current_q_value, cost,
                                                                                               np.argmax(self.Qtable[
                                                                                                             current_time + 1][
                                                                                                             tank_current_state]))
@@ -80,7 +80,7 @@ class PumpingStationControl:
 
         # Evaluation section
         if self.epsilon < 0.10:
-            self.sumAvg += self.ql.reward(water_level)
+            self.sumAvg += self.ql.cost(water_level)
             self.sumCount += 1
 
     def get_outputs(self):
@@ -89,17 +89,22 @@ class PumpingStationControl:
     def get_performance(self):
         return self.sumAvg / self.sumCount
 
-    def vis_q_table(self):
+    def vis_q_table(self, index, simConfig):
         fig, ax = plt.subplots()
 
         averaged_data = np.mean(self.Qtable, axis=2)
         averaged_data = np.rot90(averaged_data)
 
         im = ax.imshow(averaged_data, cmap="viridis")
-        plt.show()
+
+        if simConfig.saveGraphs:
+            path = "figures/qTable{}.png".format(index)
+            plt.savefig(path)
+        else:
+            plt.show()
 
 
-def run_simulation(sim_config):
+def run_simulation(sim_config, sim_index=0):
     ### Simulation parameters ###
     print("Initializing the simulation.")
     # Simulation settings
@@ -135,10 +140,8 @@ def run_simulation(sim_config):
         if k < sim_steps - 1:
             pump_speed[k + 1], num_of_running_pumps[k + 1] = controller.get_outputs()
 
-    print(controller.get_performance())
-
     if sim_config.performance_map:
-        controller.vis_q_table()
+        controller.vis_q_table(sim_index, sim_config)
 
     if sim_config.plot_events:
         ### Plot results ###
@@ -156,9 +159,17 @@ def run_simulation(sim_config):
         axs[2].legend()
         axs[2].set_ylabel("power [KW]")
         axs[2].set_xlabel("time [sec]")
-        plt.show()
+
+        if sim_config.saveGraphs:
+            path = "figures/plot{}.png".format(sim_index)
+            plt.savefig(path)
+        else:
+            plt.show()
+
+    return controller.get_performance()
 
 
 if __name__ == "__main__":
     simulation_configuration = SimulationConfig()
-    run_simulation(simulation_configuration)
+    for sim in range(1):
+        print("Simulation: {}\t Performance: {}".format(sim, run_simulation(simulation_configuration, sim)))
