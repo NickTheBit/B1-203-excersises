@@ -15,6 +15,8 @@ class Enviro:
 	RBFweights1 = pd.read_csv('RDFweights1.csv', header=None)
 	RBFweights0 = RBFweights0.values
 	RBFweights1 = RBFweights1.values
+	RBFsigma = 65
+	RBFcenters = 0.44
 	consumption_record=[]
 
 	# Safe zone
@@ -198,14 +200,14 @@ class Enviro:
 		#else:
 		#	w = self.RBFweights1[time,:]
 		for j in range(18):
-			qsum += w[j]*self.RBF((j*0.42), self.currentTankLevel, 20)
+			qsum += w[j]*self.RBF((j*self.RBFcenters), self.currentTankLevel, self.RBFsigma)
 		return qsum
 	def RBFapprox(self, w, height):
 		qestimate = []
 		for h in range(len(height)):
 			qsum = 0
 			for j in range(18):
-				qsum += w[j]*self.RBF((j*0.42), height[h], 20)
+				qsum += w[j]*self.RBF((j*self.RBFcenters), height[h], self.RBFsigma)
 			qestimate.append(qsum)
 		return qestimate	
 	def RBFerr(self, qval, w, time):
@@ -213,7 +215,7 @@ class Enviro:
 		tqestimate = 0
 		# Jw = []
 		for k in range(18):
-			hqestimate += w[k]*np.exp((-(np.abs((k*0.42)-self.currentTankLevel))**2)/2*20)
+			hqestimate += w[k]*np.exp((-(np.abs((k*self.RBFcenters)-self.currentTankLevel))**2)/2*self.RBFsigma)
 		for i in range(24):
 			tqestimate += np.exp((-(np.abs((i)-time))**2)/2*25)
 		err = qval - hqestimate

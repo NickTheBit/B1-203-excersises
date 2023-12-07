@@ -41,6 +41,7 @@ def startup():
 				optimalAction = 0
 			else:
 				optimalAction = 1
+				
 			
 			if (rd.random() > epsilon):
 				# Optimal sellection based on Q
@@ -70,7 +71,7 @@ def startup():
 				Qest = Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[i+1,:,1]), env.RBFQfunctionapproximation(w[i+1,:,0])])
 				#Qest = (1-learning_rate)*env.RBFQfunctionapproximation(w[i,:,currentAction])+learning_rate*(Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[i+1,:,1]), env.RBFQfunctionapproximation(w[i+1,:,0])])-env.RBFQfunctionapproximation(w[i,:,currentAction]))
 				RBFerror = env.RBFerr(Qest, w[i,:,currentAction], i)
-				w[i,tankState,currentAction] = env.sgd_update(w[i,tankState,currentAction], learning_rate, RBFerror, 1)
+				w[i,tankState,currentAction] = env.sgd_update(w[i,tankState,currentAction], learning_rate, RBFerror, env.RBF(tankState*env.RBFcenters, env.currentTankLevel, env.RBFsigma))
 				
 
 			else:
@@ -78,7 +79,7 @@ def startup():
 				Qest = Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[0,:,1]), env.RBFQfunctionapproximation(w[0,:,0])])
 				#Qest = (1-learning_rate)*env.RBFQfunctionapproximation(w[i,:,currentAction])+learning_rate*(Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[0,:,1]), env.RBFQfunctionapproximation(w[0,:,0])])-env.RBFQfunctionapproximation(w[i,:,currentAction]))
 				RBFerror = env.RBFerr(Qest, w[i,:,currentAction], i)
-				w[i,tankState,currentAction] = env.sgd_update(w[i,tankState,currentAction], learning_rate, RBFerror, env.RBF(tankState*0.42, env.currentTankLevel, 20))
+				w[i,tankState,currentAction] = env.sgd_update(w[i,tankState,currentAction], learning_rate, RBFerror, env.RBF(tankState*env.RBFcenters, env.currentTankLevel, env.RBFsigma))
 			
 			ActionHistory.append(currentAction*env.pumpFlowRate)
 			LevelHistory.append(env.currentTankLevel)
