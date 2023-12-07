@@ -21,9 +21,9 @@ def startup():
 	env = d.Enviro(8, 20,0) # arguments: initial tank level, pump status, noise status (either 0 or 1)
 
 	# Learning parameters
-	learning_rate = 0.1
-	discount_factor = 0.5
-	x_intersect=100 # day at which epsilon decays to 0
+	learning_rate = 0.07
+	discount_factor = 0.8
+	x_intersect=300 # day at which epsilon decays to 0
 	a=9/x_intersect
 
 	for j in range(0,N_days+1):
@@ -56,7 +56,7 @@ def startup():
 			futureTankState= env.getTankLevelDiscreteVariable()  
 
 			#We penalize more if we get out of
-			if currentAction==1 and futureTankState==8:
+			if currentAction==1 and futureTankState==18:
 				Jnext=env.cost(currentAction)*5
 			elif currentAction==0 and futureTankState==0:
 				Jnext=env.cost(currentAction)*5

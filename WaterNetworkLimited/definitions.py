@@ -15,7 +15,7 @@ class Enviro:
 	RBFweights1 = pd.read_csv('RDFweights1.csv', header=None)
 	RBFweights0 = RBFweights0.values
 	RBFweights1 = RBFweights1.values
-	RBFsigma = 65
+	RBFsigma = 60
 	RBFcenters = 0.44
 	consumption_record=[]
 
@@ -148,9 +148,9 @@ class Enviro:
 		upperLimit=4
 		barrierCost = 0
 		if self.currentTankLevel >= upperLimit:
-			barrierCost =(self.currentTankLevel-upperLimit)**2
+			barrierCost = (self.currentTankLevel-upperLimit)**2
 		elif self.currentTankLevel <= lowerLimit:
-			barrierCost = (lowerLimit-self.currentTankLevel)**2
+			barrierCost = (lowerLimit-self.currentTankLevel)**2 
 		else:
 			barrierCost = 0
 
