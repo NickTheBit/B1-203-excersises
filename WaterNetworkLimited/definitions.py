@@ -9,13 +9,13 @@ class Enviro:
 	tankMinLevel = 0.0
 	costOfOperationPerHour = 1
 	tankDircreteLevels = 8
-	pumpFlowRate=6
+	pumpFlowRate=10
 	noiseStatus=0
 	RBFweights0 = pd.read_csv('RDFweights0.csv', header=None)
 	RBFweights1 = pd.read_csv('RDFweights1.csv', header=None)
 	RBFweights0 = RBFweights0.values
 	RBFweights1 = RBFweights1.values
-	RBFsigma = 60
+	RBFsigma = 40
 	RBFcenters = 0.44
 	consumption_record=[]
 
@@ -24,7 +24,7 @@ class Enviro:
 	tankUpperLimit = (tankMaxLevel / tankDircreteLevels) * \
 		(tankDircreteLevels - 1)
 	
-	demandAtenuation=10
+	demandAtenuation=8
 	
 	# Enviroment status
 	currentTankLevel = 100
@@ -144,27 +144,27 @@ class Enviro:
 	
 	def cost(self, flow):
 		# Discrete cost
-		lowerLimit=2
-		upperLimit=4
+		lowerLimit=3
+		upperLimit=5
 		barrierCost = 0
 		if self.currentTankLevel >= upperLimit:
-			barrierCost = (self.currentTankLevel-upperLimit)**2
+			barrierCost = (self.currentTankLevel-upperLimit)**2 + 1 
 		elif self.currentTankLevel <= lowerLimit:
-			barrierCost = (lowerLimit-self.currentTankLevel)**2 
+			barrierCost = (lowerLimit-self.currentTankLevel)**2 + 1
 		else:
 			barrierCost = 0
 
-		return flow*self.costOfOperationPerHour+self.pumpFlowRate*2*barrierCost
+		return flow*self.costOfOperationPerHour+10*(self.pumpFlowRate*barrierCost)
 		
 	def getTankLevelDiscreteVariable(self):
 		
-		steepnes=4 # Steepnes of the non-linear region (steepness of the sigmoid function)
+		steepnes=3 # Steepnes of the non-linear region (steepness of the sigmoid function)
 		N_fine=7 # Number of discrete states in the region of fine discretization
 		spread=1
 
 		#Boundaries
-		lowerBoundary=2
-		higherBoundary=4
+		lowerBoundary=3
+		higherBoundary=5
 
 		# This is a pice wise continuous function from x=[0,Max_h], and consists of two linear regions 
 		# and two sigmoid functions near the boundaries
@@ -218,7 +218,7 @@ class Enviro:
 			hqestimate += w[k]*np.exp((-(np.abs((k*self.RBFcenters)-self.currentTankLevel))**2)/2*self.RBFsigma)
 		for i in range(24):
 			tqestimate += np.exp((-(np.abs((i)-time))**2)/2*25)
-		err = qval - hqestimate
+		err = (qval - hqestimate)**2
 		#for i in range(100):
 		#	Jw.append((qval - 0.01*i*qestimate)**2)
 		# minJw = np.argmin(Jw)

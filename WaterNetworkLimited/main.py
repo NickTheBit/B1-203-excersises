@@ -18,12 +18,12 @@ N_days=1000 # Number of days that we are running the simulation
 
 def startup():
 	# Initializing environment
-	env = d.Enviro(8, 20,0) # arguments: initial tank level, pump status, noise status (either 0 or 1)
+	env = d.Enviro(1, 20,1) # arguments: initial tank level, pump status, noise status (either 0 or 1)
 
 	# Learning parameters
-	learning_rate = 0.07
-	discount_factor = 0.8
-	x_intersect=300 # day at which epsilon decays to 0
+	learning_rate = 0.2
+	discount_factor = 0.4
+	x_intersect=800 # day at which epsilon decays to 0
 	a=9/x_intersect
 
 	for j in range(0,N_days+1):
@@ -57,16 +57,16 @@ def startup():
 
 			#We penalize more if we get out of
 			if currentAction==1 and futureTankState==18:
-				Jnext=env.cost(currentAction)*5
+				Jnext=env.cost(currentAction)
 			elif currentAction==0 and futureTankState==0:
-				Jnext=env.cost(currentAction)*5
+				Jnext=env.cost(currentAction)
 			else:
 				Jnext=env.cost(currentAction)
 				
 			
 
 			# Updating the Q - Value
-			if i <=22:
+			if i <= 22:
 				QTable[i][tankState][currentAction] =(1-learning_rate)*QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[i+1][futureTankState][np.argmin(QTable[i+1][futureTankState])]-QTable[i][tankState][currentAction])	
 				Qest = Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[i+1,:,1]), env.RBFQfunctionapproximation(w[i+1,:,0])])
 				#Qest = (1-learning_rate)*env.RBFQfunctionapproximation(w[i,:,currentAction])+learning_rate*(Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[i+1,:,1]), env.RBFQfunctionapproximation(w[i+1,:,0])])-env.RBFQfunctionapproximation(w[i,:,currentAction]))
