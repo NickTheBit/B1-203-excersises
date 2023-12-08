@@ -218,7 +218,7 @@ class Enviro:
 			hqestimate += w[k]*np.exp((-(np.abs((k*self.RBFcenters)-self.currentTankLevel))**2)/2*self.RBFsigma)
 		for i in range(24):
 			tqestimate += np.exp((-(np.abs((i)-time))**2)/2*25)
-		err = (qval - hqestimate)**2
+		err = qval - hqestimate
 		#for i in range(100):
 		#	Jw.append((qval - 0.01*i*qestimate)**2)
 		# minJw = np.argmin(Jw)
