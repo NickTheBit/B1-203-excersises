@@ -15,7 +15,7 @@ class Enviro:
 	RBFweights1 = pd.read_csv('RDFweights1.csv', header=None)
 	RBFweights0 = RBFweights0.values
 	RBFweights1 = RBFweights1.values
-	RBFsigma = 40
+	RBFsigma = 0.3
 	RBFcenters = 0.44
 	consumption_record=[]
 
@@ -192,7 +192,7 @@ class Enviro:
 		singleLevelQuantiny = self.tankMaxLevel / self.tankDircreteLevels
 		return int(self.currentTankLevel / singleLevelQuantiny)-1
 	def RBF(self,center, variable, sigma):
-		return np.exp((-(np.abs(center-variable))**2)/2*sigma)
+		return np.exp((-(np.abs(center-variable))**2)/(2*sigma))
 	def RBFQfunctionapproximation(self, w):
 		qsum = 0
 		#if action == 0:
@@ -215,7 +215,7 @@ class Enviro:
 		tqestimate = 0
 		# Jw = []
 		for k in range(18):
-			hqestimate += w[k]*np.exp((-(np.abs((k*self.RBFcenters)-self.currentTankLevel))**2)/2*self.RBFsigma)
+			hqestimate += w[k]*np.exp((-(np.abs((k*self.RBFcenters)-self.currentTankLevel))**2)/(2*self.RBFsigma))
 		for i in range(24):
 			tqestimate += np.exp((-(np.abs((i)-time))**2)/2*25)
 		err = qval - hqestimate
