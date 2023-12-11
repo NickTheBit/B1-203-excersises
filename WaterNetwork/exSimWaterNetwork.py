@@ -63,6 +63,7 @@ class PumpingStationControl:
         cost = self.ql.cost(water_level, power_consumed)
 
         current_q_value = self.Qtable[self.last_time][self.tank_last_state][self.last_action]
+
         # Updating the Q - Value
         self.Qtable[self.last_time][self.tank_last_state][self.last_action] = self.ql.compute_q(current_q_value, cost,
                                                                                               np.argmin(self.Qtable[
@@ -76,10 +77,14 @@ class PumpingStationControl:
         # If statement is to avoid division by zero
         if step != 0:
             # self.epsilon = (step / total_steps)
-            self.epsilon = np.log10(10 - (step / total_steps) * 10)
+            self.epsilon = np.log10(10 - (step / total_steps) * 20)
 
         # This is the epsilon-greedy algo.
-        if rd.random() > self.epsilon:
+        if tank_current_state <=0:
+            self.currentAction = 3
+        elif tank_current_state >=7:
+            self.currentAction = 0 
+        elif rd.random() > self.epsilon:
             # Optimal selection based on Q
             self.currentAction = optimal_action
         else:
@@ -98,7 +103,6 @@ class PumpingStationControl:
         return self.speed, self.num_running_pumps
 
     def get_performance(self):
-        # print(self.states)
         return self.sumAvg / self.sumCount
 
     def vis_q_table(self, index, simConfig):
@@ -146,7 +150,7 @@ def run_simulation(sim_config, sim_index=0):
             k] = water_network.getMeasurements()
 
         # Controller is only engaged every 60 minutes
-        if k % 4 == 0:
+        if k % 4 == 0 :
             controller.sim_step(level[k], int(k / 4) % 24, k, sim_steps, pump_station_power[k])
 
         if k < sim_steps - 1:
@@ -162,6 +166,10 @@ def run_simulation(sim_config, sim_index=0):
         axs[0].legend()
         axs[0].grid()
         axs[0].set_ylabel("level [m]")
+        # Plotting safe limits
+        axs[0].axhline(y=controller.hmax, color='r', linestyle='-')
+        axs[0].axhline(y=controller.hmin, color='r', linestyle='-')
+
         axs[1].plot(time, pump_station_flow, label='pump flow')
         axs[1].plot(time, demand1, label='demand flow 1')
         axs[1].plot(time, demand2, label='demand flow 2')

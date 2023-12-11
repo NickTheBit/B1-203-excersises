@@ -2,7 +2,7 @@
 
 class SimulationConfig:
     # Simulation parameters
-    simulation_duration_days = 80
+    simulation_duration_days = 40
 
     # Learning parameters
     epsilon = 0.1  # this should be adjustable

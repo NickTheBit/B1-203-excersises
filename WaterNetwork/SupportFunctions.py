@@ -5,7 +5,7 @@ class SupportFunctions:
         self.tankMaxLevel = new_tank_max_level
         self.tankMinLevel = new_tank_min_level
         self.tankDiscreteLevels = new_tank_discrete_levels
-        self.singleLevelQuantity = self.tankMaxLevel / self.tankDiscreteLevels
+        self.singleLevelQuantity = 5 / self.tankDiscreteLevels
         self.state_upper_limit = new_tank_discrete_levels
         self.learning_rate = new_learning_rate
         self.discount_factor = new_discount_factor
@@ -29,11 +29,11 @@ class SupportFunctions:
         # Extreme punishment for exceeding legal limits
         level_cost = 0
         if current_tank_level > self.tankMaxLevel:
-            level_cost = (current_tank_level - self.tankMaxLevel) ** 2+1
+            level_cost = ((current_tank_level - self.tankMaxLevel) ** 2) +1
         elif current_tank_level < self.tankMinLevel:
-            level_cost = (current_tank_level - self.tankMinLevel) ** 2+1
+            level_cost = ((current_tank_level - self.tankMinLevel) ** 2) +1
 
-        return power_consumed + level_cost
+        return power_consumed + 10*level_cost
 
     # This needs to account for cost of operation, but I don't give a shit right now
 
