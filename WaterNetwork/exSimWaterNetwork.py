@@ -43,7 +43,7 @@ class PumpingStationControl:
         self.ql = SupportFunctions(self.hmax, self.hmin, self.discreteStates, self.learning_rate,
                                    self.discount_factor)
 
-    def sim_step(self, water_level, current_time, step, total_steps):
+    def sim_step(self, water_level, current_time, step, total_steps, power_consumed):
         # We are updating the Q-values, unless the step = 0
 
         # Updating controller data
@@ -53,7 +53,7 @@ class PumpingStationControl:
         self.num_running_pumps = self.currentAction
 
         # We penalize more if we get out of bounds
-        cost = self.ql.cost(water_level)
+        cost = self.ql.cost(water_level, power_consumed)
 
         current_q_value = self.Qtable[current_time][tank_current_state][self.currentAction]
         # Updating the Q - Value
@@ -80,7 +80,7 @@ class PumpingStationControl:
 
         # Evaluation section
         if self.epsilon < 0.10:
-            self.sumAvg += self.ql.cost(water_level)
+            self.sumAvg += self.ql.cost(water_level, 0)
             self.sumCount += 1
 
     def get_outputs(self):
@@ -135,7 +135,7 @@ def run_simulation(sim_config, sim_index=0):
 
         # Controller is only engaged every 60 minutes
         if k % 4 == 0:
-            controller.sim_step(level[k], int(k / 4) % 24, k, sim_steps)
+            controller.sim_step(level[k], int(k / 4) % 24, k, sim_steps, pump_station_power[k])
 
         if k < sim_steps - 1:
             pump_speed[k + 1], num_of_running_pumps[k + 1] = controller.get_outputs()
@@ -171,5 +171,9 @@ def run_simulation(sim_config, sim_index=0):
 
 if __name__ == "__main__":
     simulation_configuration = SimulationConfig()
-    for sim in range(1):
-        print("Simulation: {}\t Performance: {}".format(sim, run_simulation(simulation_configuration, sim)))
+    sim_results = []
+    for sim in range(10):
+        sim_results.append(run_simulation(simulation_configuration, sim))
+
+    for result in range(len(sim_results)):
+        print("Simulation: {}\t Performance: {}".format(result, sim_results[result]))

@@ -23,14 +23,15 @@ class SupportFunctions:
 
         return return_value
 
-    def cost(self, current_tank_level):
+    def cost(self, current_tank_level, power_consumed):
         # Extreme punishment for exceeding legal limits
+        level_cost = 0
         if current_tank_level > self.tankMaxLevel:
-            return (current_tank_level - self.tankMaxLevel) ** 2
+            level_cost = (current_tank_level - self.tankMaxLevel) ** 2
         elif current_tank_level < self.tankMinLevel:
-            return current_tank_level ** 2
-        else:
-            return 0
+            level_cost = current_tank_level ** 2
+
+        return power_consumed + level_cost
 
     # This needs to account for cost of operation, but I don't give a shit right now
 
