@@ -142,18 +142,21 @@ def startup():
 		RBFQ0.append(env.RBFapprox(w[g,:,0], waterheight))
 	for n in range(24):
 		RBFQ1.append(env.RBFapprox(w[n,:,1], waterheight))
-	
+	pdRBFQ0 = pd.DataFrame(RBFQ0)
+	pdRBFQ1 = pd.DataFrame(RBFQ1)
+	RBFQ0sum = np.sum(pdRBFQ0, axis='rows')
+	RBFQ1sum = np.sum(pdRBFQ1, axis='rows')
 	plt.figure(3)
-	line1, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11, line12 = plt.plot(waterheight, RBFQ0[0],waterheight, RBFQ0[2],waterheight, RBFQ0[4],waterheight, RBFQ0[6],waterheight, RBFQ0[8],waterheight, RBFQ0[10],waterheight, RBFQ0[12],waterheight, RBFQ0[14],waterheight, RBFQ0[16],waterheight, RBFQ0[18],waterheight, RBFQ0[20], waterheight, RBFQ0[22])
+	line1, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11, line12, line14 = plt.plot(waterheight, RBFQ0[0],waterheight, RBFQ0[2],waterheight, RBFQ0[4],waterheight, RBFQ0[6],waterheight, RBFQ0[8],waterheight, RBFQ0[10],waterheight, RBFQ0[12],waterheight, RBFQ0[14],waterheight, RBFQ0[16],waterheight, RBFQ0[18],waterheight, RBFQ0[20], waterheight, RBFQ0[22], waterheight, RBFQ0sum)
 	plt.xlabel("Water Level")  # X-axis label
 	plt.ylabel("Q")  # Y-axis label
-	plt.figlegend([line1, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11, line12], ['0h', '2h','4h','6h','8h','10h','12h','14h', '16h', '18h', '20h', '22h'])
+	plt.figlegend([line1, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11, line12, line14], ['0h', '2h','4h','6h','8h','10h','12h','14h', '16h', '18h', '20h', '22h', 'sum'])
 	plt.title("Q vs Water Level action 0")  # Title for the second subplot
 	plt.figure(4)
-	line112, line21, line31, line41, line51, line61, line71, line81, line91, line101, line111, line121 = plt.plot(waterheight, RBFQ1[0],waterheight, RBFQ1[2],waterheight, RBFQ1[4],waterheight, RBFQ1[6],waterheight, RBFQ1[8],waterheight, RBFQ1[10],waterheight, RBFQ1[12],waterheight, RBFQ1[14],waterheight, RBFQ1[16],waterheight, RBFQ1[18],waterheight, RBFQ1[20], waterheight, RBFQ1[22])
+	line112, line21, line31, line41, line51, line61, line71, line81, line91, line101, line111, line121, line15 = plt.plot(waterheight, RBFQ1[0],waterheight, RBFQ1[2],waterheight, RBFQ1[4],waterheight, RBFQ1[6],waterheight, RBFQ1[8],waterheight, RBFQ1[10],waterheight, RBFQ1[12],waterheight, RBFQ1[14],waterheight, RBFQ1[16],waterheight, RBFQ1[18],waterheight, RBFQ1[20], waterheight, RBFQ1[22], waterheight, RBFQ1sum)
 	plt.xlabel("Water Level")  # X-axis label
 	plt.ylabel("Q")  # Y-axis label
-	plt.figlegend([line112, line21, line31, line41, line51, line61, line71, line81, line91, line101, line111, line121], ['0h', '2h','4h','6h','8h','10h','12h','14h', '16h', '18h', '20h', '22h'])
+	plt.figlegend([line112, line21, line31, line41, line51, line61, line71, line81, line91, line101, line111, line121, line15], ['0h', '2h','4h','6h','8h','10h','12h','14h', '16h', '18h', '20h', '22h', 'sum'])
 	plt.title("Q vs Water Level action 1")  # Title for the second subplot	
 	plt.show()
 
