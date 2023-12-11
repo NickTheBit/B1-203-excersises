@@ -38,6 +38,12 @@ class PumpingStationControl:
 
         # Starting action
         self.currentAction = 1
+        self.last_action = 1
+        self.tank_last_state = 0
+        self.last_time = 0
+
+        # testing shit.
+        self.states = []
 
         # Initializing Q-learning
         self.ql = SupportFunctions(self.hmax, self.hmin, self.discreteStates, self.learning_rate,
@@ -48,6 +54,7 @@ class PumpingStationControl:
 
         # Updating controller data
         tank_current_state = self.ql.get_tank_level_discrete(water_level)
+        self.states.append(tank_current_state)
 
         # Take action a and observe s',r'
         self.num_running_pumps = self.currentAction
@@ -55,15 +62,15 @@ class PumpingStationControl:
         # We penalize more if we get out of bounds
         cost = self.ql.cost(water_level, power_consumed)
 
-        current_q_value = self.Qtable[current_time][tank_current_state][self.currentAction]
+        current_q_value = self.Qtable[self.last_time][self.tank_last_state][self.last_action]
         # Updating the Q - Value
-        self.Qtable[current_time][tank_current_state][self.currentAction] = self.ql.compute_q(current_q_value, cost,
-                                                                                              np.argmax(self.Qtable[
-                                                                                                            current_time + 1][
+        self.Qtable[self.last_time][self.tank_last_state][self.last_action] = self.ql.compute_q(current_q_value, cost,
+                                                                                              np.argmin(self.Qtable[
+                                                                                                            current_time][
                                                                                                             tank_current_state]))
 
         # Selecting next step
-        optimal_action = np.argmax(self.Qtable[current_time][tank_current_state])
+        optimal_action = np.argmin(self.Qtable[current_time][tank_current_state])
 
         # Setting epsilon depending on simulation progress
         # If statement is to avoid division by zero
@@ -77,6 +84,10 @@ class PumpingStationControl:
             self.currentAction = optimal_action
         else:
             self.currentAction = rd.randint(0, self.num_of_pumps)
+        
+        self.tank_last_state =  tank_current_state
+        self.last_action = self.currentAction
+        self.last_time= current_time
 
         # Evaluation section
         if self.epsilon < 0.10:
@@ -87,6 +98,7 @@ class PumpingStationControl:
         return self.speed, self.num_running_pumps
 
     def get_performance(self):
+        # print(self.states)
         return self.sumAvg / self.sumCount
 
     def vis_q_table(self, index, simConfig):
