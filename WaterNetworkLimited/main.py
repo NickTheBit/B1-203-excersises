@@ -12,6 +12,7 @@ QTable = np.zeros((24, 19, 2))
 LevelHistory=[]
 ActionHistory=[]
 w = np.zeros((24 , 19, 2))
+#w = np.zeros((24, 2))
 N_days=1000 # Number of days that we are running the simulation
 
 
@@ -37,6 +38,8 @@ def startup():
 			# This is the espilon-greedy algo.
 			Q0 = env.RBFQfunctionapproximation(w[i,:,0])
 			Q1 = env.RBFQfunctionapproximation(w[i,:,1])
+			#Q0 = env.RBFQfunctionapproximation(w[i,0])
+			#Q1 = env.RBFQfunctionapproximation(w[i,1])
 			if Q0 <= Q1:
 				optimalAction = 0
 			else:
@@ -69,18 +72,24 @@ def startup():
 			if i <= 22:
 				QTable[i][tankState][currentAction] =(1-learning_rate)*QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[i+1][futureTankState][np.argmin(QTable[i+1][futureTankState])]-QTable[i][tankState][currentAction])	
 				Qest = Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[i+1,:,1]), env.RBFQfunctionapproximation(w[i+1,:,0])])
+				#Qest = Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[i+1,1]), env.RBFQfunctionapproximation(w[i+1,0])])
 				#Qest = (1-learning_rate)*env.RBFQfunctionapproximation(w[i,:,currentAction])+learning_rate*(Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[i+1,:,1]), env.RBFQfunctionapproximation(w[i+1,:,0])])-env.RBFQfunctionapproximation(w[i,:,currentAction]))
 				RBFerror = env.RBFerr(Qest, w[i,:,currentAction], i)
+				#RBFerror = env.RBFerr(Qest, w[i,currentAction], i)
 				w[i,tankState,currentAction] = env.sgd_update(w[i,tankState,currentAction], learning_rate, RBFerror, env.RBF(tankState*env.RBFcenters, env.currentTankLevel, env.RBFsigma))
+				#w[i,currentAction] = env.sgd_update(w[i,currentAction], learning_rate, RBFerror, env.RBF(tankState*env.RBFcenters, env.currentTankLevel, env.RBFsigma))
 				
 
 			else:
 				QTable[i][tankState][currentAction] =(1-learning_rate)*QTable[i][tankState][currentAction]+learning_rate*(Jnext+discount_factor*QTable[0][futureTankState][np.argmin(QTable[0][futureTankState])]-QTable[i][tankState][currentAction])
 				Qest = Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[0,:,1]), env.RBFQfunctionapproximation(w[0,:,0])])
+				#Qest = Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[0,1]), env.RBFQfunctionapproximation(w[0,0])])
 				#Qest = (1-learning_rate)*env.RBFQfunctionapproximation(w[i,:,currentAction])+learning_rate*(Jnext + discount_factor*np.min([env.RBFQfunctionapproximation(w[0,:,1]), env.RBFQfunctionapproximation(w[0,:,0])])-env.RBFQfunctionapproximation(w[i,:,currentAction]))
 				RBFerror = env.RBFerr(Qest, w[i,:,currentAction], i)
+				#RBFerror = env.RBFerr(Qest, w[i,currentAction], i)
 				w[i,tankState,currentAction] = env.sgd_update(w[i,tankState,currentAction], learning_rate, RBFerror, env.RBF(tankState*env.RBFcenters, env.currentTankLevel, env.RBFsigma))
-			
+				#w[i,currentAction] = env.sgd_update(w[i,currentAction], learning_rate, RBFerror, env.RBF(tankState*env.RBFcenters, env.currentTankLevel, env.RBFsigma))
+
 			ActionHistory.append(currentAction*env.pumpFlowRate)
 			LevelHistory.append(env.currentTankLevel)
 	print(len(LevelHistory))
@@ -95,7 +104,7 @@ def startup():
     # Convert the array to a DataFrame
     #df = pd.DataFrame(np.max(QTable, axis=2))
 
-	plt.style.use('dark_background')
+	#plt.style.use('dark_background')
 
 	plt.figure(1)
 	plt.suptitle("Water Level and Action over time")  # Title for the entire figure
@@ -140,8 +149,10 @@ def startup():
 	RBFQ1 = []
 	for g in range(24):
 		RBFQ0.append(env.RBFapprox(w[g,:,0], waterheight))
+		#RBFQ0.append(env.RBFapprox(w[g,0], waterheight))
 	for n in range(24):
 		RBFQ1.append(env.RBFapprox(w[n,:,1], waterheight))
+		#RBFQ1.append(env.RBFapprox(w[n,1], waterheight))
 	pdRBFQ0 = pd.DataFrame(RBFQ0)
 	pdRBFQ1 = pd.DataFrame(RBFQ1)
 	RBFQ0sum = np.sum(pdRBFQ0, axis='rows')/24
@@ -159,6 +170,12 @@ def startup():
 	plt.figlegend([line112, line21, line31, line41, line51, line61, line71, line81, line91, line101, line111, line121], ['0h', '2h','4h','6h','8h','10h','12h','14h', '16h', '18h', '20h', '22h'])
 	plt.title("Q vs Water Level action 1")  # Title for the second subplot	
 	plt.figure(5)
+	linea, lineb,linec,lined,linee,linef = plt.plot(waterheight, RBFQ0[0],waterheight, RBFQ0[8],waterheight, RBFQ0[16],waterheight, RBFQ1[0],waterheight, RBFQ1[8],waterheight, RBFQ1[16])
+	plt.xlabel("Water Level")  # X-axis label
+	plt.ylabel("Q")  # Y-axis label
+	plt.figlegend([linea, lineb,linec, lined,linee,linef], ['0h off', '8h off','16h off','0h on','8h on','16h on'])
+	plt.title("Comparison of Q values for action 1 and 0")  # Title for the second subplot	
+	plt.figure(6)
 	line14, line15 = plt.plot(waterheight, RBFQ0sum, waterheight, RBFQ1sum)
 	plt.xlabel("Water Level")  # X-axis label
 	plt.ylabel("Q")  # Y-axis label

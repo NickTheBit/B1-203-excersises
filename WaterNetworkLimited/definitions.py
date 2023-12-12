@@ -154,7 +154,7 @@ class Enviro:
 		else:
 			barrierCost = 0
 
-		return flow*self.costOfOperationPerHour+10*(self.pumpFlowRate*barrierCost)
+		return flow*self.pumpFlowRate+10*(self.pumpFlowRate*barrierCost)
 		
 	def getTankLevelDiscreteVariable(self):
 		
@@ -201,6 +201,7 @@ class Enviro:
 		#	w = self.RBFweights1[time,:]
 		for j in range(18):
 			qsum += w[j]*self.RBF((j*self.RBFcenters), self.currentTankLevel, self.RBFsigma)
+			#qsum += self.RBF((j*self.RBFcenters), self.currentTankLevel, self.RBFsigma)
 		return qsum
 	def RBFapprox(self, w, height):
 		qestimate = []
@@ -208,6 +209,8 @@ class Enviro:
 			qsum = 0
 			for j in range(18):
 				qsum += w[j]*self.RBF((j*self.RBFcenters), height[h], self.RBFsigma)
+				#qsum += self.RBF((j*self.RBFcenters), height[h], self.RBFsigma)
+			#qestimate.append(w*qsum)
 			qestimate.append(qsum)
 		return qestimate	
 	def RBFerr(self, qval, w, time):
@@ -216,9 +219,11 @@ class Enviro:
 		# Jw = []
 		for k in range(18):
 			hqestimate += w[k]*np.exp((-(np.abs((k*self.RBFcenters)-self.currentTankLevel))**2)/(2*self.RBFsigma))
+			#hqestimate += np.exp((-(np.abs((k*self.RBFcenters)-self.currentTankLevel))**2)/(2*self.RBFsigma))
 		for i in range(24):
 			tqestimate += np.exp((-(np.abs((i)-time))**2)/2*25)
 		err = qval - hqestimate
+		#err = (qval - w*hqestimate)**2
 		#for i in range(100):
 		#	Jw.append((qval - 0.01*i*qestimate)**2)
 		# minJw = np.argmin(Jw)
