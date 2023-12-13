@@ -107,22 +107,22 @@ def startup():
 	#plt.style.use('dark_background')
 
 	plt.figure(1)
-	plt.suptitle("Water Level and Action over time")  # Title for the entire figure
+	#plt.suptitle("Water Level and Action over time")  # Title for the entire figure
 
 	# First subplot
-	plt.subplot(2, 1, 1)
+	#plt.subplot(2, 1, 1)
 	plt.plot(LevelHistory)
-	plt.ylabel("Water Level [L]")  # Y-axis label for the first subplot
-	plt.title("Water Level over time [L]")  # Title for the first subplot
+	plt.ylabel("Water Level [m]")  # Y-axis label for the first subplot
+	#plt.title("Water Level over time [L]")  # Title for the first subplot
 
 	# Second subplot
-	plt.subplot(2, 1, 2)
-	plt.plot(ActionHistory)
-	plt.ylabel("Action")  # Y-axis label for the second subplot
+	#plt.subplot(2, 1, 2)
+	#plt.plot(ActionHistory)
+	#plt.ylabel("Action")  # Y-axis label for the second subplot
 	plt.xlabel("time [h]")  # X-axis label for the second subplot
 
 	# Adjust layout
-	plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Adjust the rect to provide space for the suptitle
+	#plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Adjust the rect to provide space for the suptitle
 
 
 	plt.figure(2)
@@ -173,8 +173,7 @@ def startup():
 	linea, lineb,linec,lined,linee,linef = plt.plot(waterheight, RBFQ0[0],waterheight, RBFQ0[8],waterheight, RBFQ0[16],waterheight, RBFQ1[0],waterheight, RBFQ1[8],waterheight, RBFQ1[16])
 	plt.xlabel("Water Level")  # X-axis label
 	plt.ylabel("Q")  # Y-axis label
-	plt.figlegend([linea, lineb,linec, lined,linee,linef], ['0h off', '8h off','16h off','0h on','8h on','16h on'])
-	plt.title("Comparison of Q values for action 1 and 0")  # Title for the second subplot	
+	plt.figlegend([linea, lineb,linec, lined,linee,linef], ['0h off', '8h off','16h off','0h on','8h on','16h on']) # Title for the second subplot	
 	plt.figure(6)
 	line14, line15 = plt.plot(waterheight, RBFQ0sum, waterheight, RBFQ1sum)
 	plt.xlabel("Water Level")  # X-axis label
